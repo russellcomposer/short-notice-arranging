@@ -12,6 +12,7 @@
   --rule:#C6CAD1;
   --hi:#FFE14A;
   --hi-alpha:.6;
+  --wall:#BCC1CA;
   --hi-ink:#1A1D25;
   --warn:#B23A22;
   --ok:#2E6B40;
@@ -23,12 +24,12 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --paper:#13151B;--card:#1C1F27;--ink:#ECEDE7;--ink-2:#A2A7B3;--rule:#3B404C;
-    --hi:#EDCF35;--hi-alpha:.28;--hi-ink:#13151B;--warn:#F08068;--ok:#7FC793;color-scheme:dark;
+    --hi:#EDCF35;--hi-alpha:.28;--wall:#343944;--hi-ink:#13151B;--warn:#F08068;--ok:#7FC793;color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --paper:#13151B;--card:#1C1F27;--ink:#ECEDE7;--ink-2:#A2A7B3;--rule:#3B404C;
-  --hi:#EDCF35;--hi-alpha:.28;--hi-ink:#13151B;--warn:#F08068;--ok:#7FC793;color-scheme:dark;
+  --hi:#EDCF35;--hi-alpha:.28;--wall:#343944;--hi-ink:#13151B;--warn:#F08068;--ok:#7FC793;color-scheme:dark;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -221,7 +222,7 @@ footer{margin-top:56px;padding-top:14px;border-top:1px solid var(--rule);font-si
   .lede{margin-bottom:4px}
   .sub{margin-bottom:16px}
   .hero-main{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:20px}
-  .hero-main h1,.hero-main .lede,.hero-main .sub,.hero-main .kinds{grid-column:1/-1}
+  .hero-main h1,.hero-main .lede,.hero-main .sub{grid-column:1/-1}
   .hero-main .or-email{margin-top:0}
   .hero-main .or-email{flex-wrap:nowrap;white-space:nowrap}
   .hero-main .or-email .lab-long{display:none}
@@ -241,10 +242,27 @@ footer{margin-top:56px;padding-top:14px;border-top:1px solid var(--rule);font-si
   .or-email .addr{font-size:.8rem;word-break:normal;min-width:0;overflow:hidden;text-overflow:ellipsis}
   .or-email .small-btn{flex:none}
 }
-/* ---------- ensemble types under the title ---------- */
-.kinds{list-style:none;margin:2px 0 20px;padding:0;display:flex;flex-wrap:wrap;gap:6px 6px;max-width:44rem}
-.kinds li{font-family:var(--f-display);font-variation-settings:"wdth" 80;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.82rem;line-height:1;padding:7px 10px 6px;border:1.5px solid var(--ink);border-radius:999px;white-space:nowrap}
-@media (min-width:900px){.kinds{margin:4px 0 16px;gap:5px}.kinds li{font-size:.76rem;padding:6px 9px 5px}.hero .lede{margin-bottom:8px;max-width:none}}
+/* ---------- background wall behind the title ---------- */
+.hero-main{position:relative;isolation:isolate}
+.wall{position:absolute;z-index:-1;top:-14px;bottom:-6px;left:50%;width:100vw;transform:translateX(-50%);overflow:hidden;pointer-events:none;
+  display:flex;flex-direction:column;justify-content:space-evenly;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 18%,#000 82%,transparent 100%);mask-image:linear-gradient(to bottom,transparent 0,#000 18%,#000 82%,transparent 100%)}
+.wall-row{position:relative;height:4.6rem;display:flex;align-items:center}
+.wall-row::before{content:"";position:absolute;left:0;right:0;top:50%;height:53px;transform:translateY(-50%);
+  background:repeating-linear-gradient(to bottom,var(--wall) 0 1px,transparent 1px 13px);opacity:.7}
+.wall-track{position:relative;display:flex;align-items:center;width:max-content;animation:wallmove 90s linear infinite}
+.wall-row:nth-child(2) .wall-track{animation-direction:reverse;animation-duration:110s}
+.wall-row:nth-child(3) .wall-track{animation-duration:130s}
+.wall-track span{font-family:var(--f-display);font-variation-settings:"wdth" 72;font-weight:900;text-transform:uppercase;font-size:3.6rem;line-height:1;letter-spacing:.01em;
+  color:transparent;-webkit-text-stroke:1.2px var(--wall);white-space:nowrap}
+.wall-track .wclef{flex:none;width:40px;height:120px;margin:0 .6em;overflow:visible}
+.wclef text{font-family:"PBT Clef",serif;font-size:52px;fill:var(--wall)}
+.hero .lede,.hero .sub,.hero .or-email{text-shadow:0 0 3px var(--paper),0 0 8px var(--paper),0 0 14px var(--paper)}
+@keyframes wallmove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion: reduce){.wall-track{animation:none}}
+@media (max-width:559px){.wall-row{height:3.4rem}.wall-row::before{height:41px;background:repeating-linear-gradient(to bottom,var(--wall) 0 1px,transparent 1px 10px)}.wall-track span{font-size:2.5rem}.wall-track .wclef{width:31px;height:92px}}
+.stage{overflow:visible}
+html,body{overflow-x:clip}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
 
@@ -538,15 +556,16 @@ const screens = {
 0(){
   return '<section class="hero">'+
     '<div class="hero-main">'+
+    wallHtml()+
     '<h1><span class="hl">Short Notice</span> Arranging</h1>'+
     '<p class="lede">Reductions, re-scoring and rewritten parts for the players who actually turn up.</p>'+
-    '<ul class="kinds" aria-label="Who it\u2019s for"><li>Symphony orchestra</li><li>Chamber ensemble</li><li>Wind band</li><li>Brass band</li><li>String orchestra</li><li>Choral accompaniment</li></ul>'+
+    '<p class="sub">For bands and orchestras. Weekends included.</p>'+
     '<button class="go" id="start" type="button">Start: eight short questions</button>'+
     '<div class="or-email"><span class="lab-long">Rather just email?</span><span class="lab-short">Or email</span> <span class="addr">'+EMAIL+'</span><button class="small-btn" type="button" data-copy="'+EMAIL+'">Copy</button></div>'+
     '</div>'+
     '<div class="hero-side">'+
     '<div class="facts">'+
-      '<div><b>Send it today</b><span>Weekends included. Up to '+MIN_PER_DAY+' minutes of music: parts by '+LONGDAYS[addDays(today(),2).getDay()]+', 10am UK time.</span></div>'+
+      '<div><b>Send it today</b><span>Up to '+MIN_PER_DAY+' minutes of music: parts by '+LONGDAYS[addDays(today(),2).getDay()]+', 10am UK time.</span></div>'+
       '<div><b>From £49 a minute</b><span>Launch rates. Score, parts and an audio preview included.</span></div>'+
       '<div><b>Permission first</b><span>Originals, public-domain works, or music you’ve cleared with the publisher.</span></div>'+
     '</div>'+
@@ -686,6 +705,18 @@ sent(){
     '<div class="nav"><button class="go" id="change" type="button">Change my answer</button><button class="back-btn" id="again" type="button">Start again</button></div></section>';
 }
 };
+/* background wall: faint staves with the line-ups written across them, drifting slowly */
+function wallHtml(){
+  const rows=[
+    ["Symphony orchestra","Wind band","Chamber ensemble","Brass band"],
+    ["Brass band","String orchestra","Choral accompaniment","Symphony orchestra"],
+    ["Chamber ensemble","Wind band","String orchestra","Choral accompaniment"]
+  ];
+  return '<div class="wall" aria-hidden="true">'+rows.map(r=>{
+    const run=r.map(t=>'<span>'+t+'</span><svg class="wclef" viewBox="0 0 40 120"><text x="4" y="86">\u{1D11E}</text></svg>').join("");
+    return '<div class="wall-row"><div class="wall-track">'+run+run+'</div></div>';
+  }).join("")+'</div>';
+}
 function moreItem(title, lead, body){
   return '<details name="more"><summary><span class="more-h">'+title+'</span>'+(lead?'<span class="lead">'+lead+'</span>':'<span class="lead"></span>')+'<span class="pm" aria-hidden="true">+</span></summary><div class="body">'+body+'</div></details>';
 }
