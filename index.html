@@ -221,7 +221,7 @@ footer{margin-top:56px;padding-top:14px;border-top:1px solid var(--rule);font-si
   .lede{margin-bottom:4px}
   .sub{margin-bottom:16px}
   .hero-main{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:20px}
-  .hero-main h1,.hero-main .lede,.hero-main .sub{grid-column:1/-1}
+  .hero-main h1,.hero-main .lede,.hero-main .sub,.hero-main .kinds{grid-column:1/-1}
   .hero-main .or-email{margin-top:0}
   .hero-main .or-email{flex-wrap:nowrap;white-space:nowrap}
   .hero-main .or-email .lab-long{display:none}
@@ -241,6 +241,10 @@ footer{margin-top:56px;padding-top:14px;border-top:1px solid var(--rule);font-si
   .or-email .addr{font-size:.8rem;word-break:normal;min-width:0;overflow:hidden;text-overflow:ellipsis}
   .or-email .small-btn{flex:none}
 }
+/* ---------- ensemble types under the title ---------- */
+.kinds{list-style:none;margin:2px 0 20px;padding:0;display:flex;flex-wrap:wrap;gap:6px 6px;max-width:44rem}
+.kinds li{font-family:var(--f-display);font-variation-settings:"wdth" 80;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.82rem;line-height:1;padding:7px 10px 6px;border:1.5px solid var(--ink);border-radius:999px;white-space:nowrap}
+@media (min-width:900px){.kinds{margin:4px 0 16px;gap:5px}.kinds li{font-size:.76rem;padding:6px 9px 5px}.hero .lede{margin-bottom:8px;max-width:none}}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
 
@@ -286,7 +290,7 @@ const PROBLEMS = [
   ["other","Something else",""]
 ];
 const GROUPS = [
-  ["wind","Concert or wind band"],["brass","Brass band"],["orch","Orchestra"],["strings","String orchestra"],
+  ["wind","Concert or wind band"],["brass","Brass band"],["orch","Orchestra"],["strings","String orchestra"],["choir","Choir with band or orchestra","The choir stays as it is; the accompaniment is written for your players."],
   ["chamber","Small ensemble"],["other","Something else"]
 ];
 const ORCH = [["fl","Flute"],["ob","Oboe"],["cl","Clarinet"],["bsn","Bassoon"],["hn","Horn"],["tpt","Trumpet"],["tbn","Trombone"],["tba","Tuba"],["timp","Timpani"],["perc","Percussion"],["hp","Harp"],["pno","Piano"],["vn1","Violin I"],["vn2","Violin II"],["va","Viola"],["vc","Cello"],["db","Double bass"]];
@@ -294,6 +298,7 @@ const INSTR = {
   wind:[["picc","Piccolo"],["fl","Flute"],["ob","Oboe"],["bsn","Bassoon"],["ebcl","Eb clarinet"],["cl1","1st clarinet"],["cl2","2nd clarinet"],["cl3","3rd clarinet"],["bcl","Bass clarinet"],["asx1","1st alto sax"],["asx2","2nd alto sax"],["tsx","Tenor sax"],["bsx","Baritone sax"],["tpt1","1st trumpet / cornet"],["tpt2","2nd trumpet / cornet"],["tpt3","3rd trumpet / cornet"],["hn1","1st horn in F"],["hn2","2nd horn in F"],["hn3","3rd horn in F"],["hn4","4th horn in F"],["tbn1","1st trombone"],["tbn2","2nd trombone"],["btbn","Bass trombone"],["euph","Euphonium"],["tba","Tuba"],["sb","String bass"],["timp","Timpani"],["perc","Percussion"],["kbd","Piano / keys"]],
   brass:[["sop","Soprano cornet"],["solo","Solo cornet"],["rep","Repiano cornet"],["cnt2","2nd cornet"],["cnt3","3rd cornet"],["flug","Flugelhorn"],["shn","Solo horn"],["thn1","1st horn"],["thn2","2nd horn"],["bar1","1st baritone"],["bar2","2nd baritone"],["tbn1","1st trombone"],["tbn2","2nd trombone"],["btbn","Bass trombone"],["euph","Euphonium"],["ebb","Eb bass"],["bbb","Bb bass"],["perc","Percussion"]],
   orch:ORCH,
+  choir:ORCH,
   strings:[["vn1","Violin I"],["vn2","Violin II"],["va","Viola"],["vc","Cello"],["db","Double bass"],["pno","Piano"]],
   chamber:ORCH
 };
@@ -352,25 +357,35 @@ const R = {quartet:49, perExtra:0.15, piano:0.20, band:74.40, fullOrch:90, wwStr
 function withPiano(r, label, piano){
   return piano ? {r:Math.round(r*(1+R.piano)*100)/100, label:label+" with piano"} : {r, label};
 }
+function orchRate(){
+  const L=S.lineup, has=k=>(L[k]||0)>0;
+  if (has("tpt")||has("tbn")||has("tba")) return withPiano(R.fullOrch,"Full orchestra",has("pno"));
+  const base={fl:2,ob:2,cl:2,bsn:2,hn:2,perc:2,timp:2};
+  let extra = has("hp") ? 1 : 0;
+  for(const k in base){ if((L[k]||0)>base[k]) extra++; }
+  return withPiano(R.wwStrings+R.wwExtra*extra,"Woodwind and string orchestra",has("pno"));
+}
+function chamberRate(){
+  const L=S.lineup, has=k=>(L[k]||0)>0, pianoKey="pno";
+  const n = Object.entries(L).filter(([k,v])=>v>0 && k!==pianoKey).reduce((s,[,v])=>s+v,0);
+  if (n===0 && !has(pianoKey)) return null;
+  const r = Math.round(R.quartet*(1+R.perExtra*Math.max(0,n-4))*100)/100;
+  return withPiano(r, Math.max(n,1)+"-instrument ensemble", has(pianoKey));
+}
 function rate(){
   const L=S.lineup, has=k=>(L[k]||0)>0;
   switch(S.group){
     case "wind": return withPiano(R.band,"Wind band",has("kbd"));
     case "brass": return {r:R.band,label:"Brass band"};
     case "strings": return withPiano(R.quartet,"String orchestra",has("pno"));
-    case "orch": {
-      if (has("tpt")||has("tbn")||has("tba")) return withPiano(R.fullOrch,"Full orchestra",has("pno"));
-      const base={fl:2,ob:2,cl:2,bsn:2,hn:2,perc:2,timp:2};
-      let extra = has("hp") ? 1 : 0;
-      for(const k in base){ if((L[k]||0)>base[k]) extra++; }
-      return withPiano(R.wwStrings+R.wwExtra*extra,"Woodwind and string orchestra",has("pno"));
-    }
-    case "chamber": {
-      const pianoKey = "pno";
-      const n = Object.entries(L).filter(([k,v])=>v>0 && k!==pianoKey).reduce((s,[,v])=>s+v,0);
-      if (n===0 && !has(pianoKey)) return null;
-      const r = Math.round(R.quartet*(1+R.perExtra*Math.max(0,n-4))*100)/100;
-      return withPiano(r, Math.max(n,1)+"-instrument ensemble", has(pianoKey));
+    case "orch": return orchRate();
+    case "chamber": return chamberRate();
+    case "choir": {
+      // accompaniment for a choir: whichever is lower of the per-instrument and the orchestral rate
+      const a=chamberRate(), b=orchRate();
+      if(!a) return null;
+      const best = (b && b.r < a.r) ? b : a;
+      return {r:best.r, label:"Choral accompaniment, "+best.label.charAt(0).toLowerCase()+best.label.slice(1)};
     }
     default: return null;
   }
@@ -525,13 +540,13 @@ const screens = {
     '<div class="hero-main">'+
     '<h1><span class="hl">Short Notice</span> Arranging</h1>'+
     '<p class="lede">Reductions, re-scoring and rewritten parts for the players who actually turn up.</p>'+
-    '<p class="sub">For bands and orchestras. Weekends included.</p>'+
+    '<ul class="kinds" aria-label="Who it\u2019s for"><li>Symphony orchestra</li><li>Chamber ensemble</li><li>Wind band</li><li>Brass band</li><li>String orchestra</li><li>Choral accompaniment</li></ul>'+
     '<button class="go" id="start" type="button">Start: eight short questions</button>'+
     '<div class="or-email"><span class="lab-long">Rather just email?</span><span class="lab-short">Or email</span> <span class="addr">'+EMAIL+'</span><button class="small-btn" type="button" data-copy="'+EMAIL+'">Copy</button></div>'+
     '</div>'+
     '<div class="hero-side">'+
     '<div class="facts">'+
-      '<div><b>Send it today</b><span>Up to '+MIN_PER_DAY+' minutes of music: parts by '+LONGDAYS[addDays(today(),2).getDay()]+', 10am UK time.</span></div>'+
+      '<div><b>Send it today</b><span>Weekends included. Up to '+MIN_PER_DAY+' minutes of music: parts by '+LONGDAYS[addDays(today(),2).getDay()]+', 10am UK time.</span></div>'+
       '<div><b>From £49 a minute</b><span>Launch rates. Score, parts and an audio preview included.</span></div>'+
       '<div><b>Permission first</b><span>Originals, public-domain works, or music you’ve cleared with the publisher.</span></div>'+
     '</div>'+
