@@ -1,0 +1,821 @@
+<title>Short Notice Arranging</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+/* Layout: the form is a band part. A treble-clef staff runs across the top (Presto, 1/4); each question is one bar, a scale from C4 to C5, with its bar number boxed like a rehearsal mark. Highlighter marks what's done. */
+:root{
+  --paper:#F4F5F0;
+  --card:#FFFFFF;
+  --ink:#1A1D25;
+  --ink-2:#555B68;
+  --rule:#C6CAD1;
+  --hi:#FFE14A;
+  --hi-alpha:.6;
+  --hi-ink:#1A1D25;
+  --warn:#B23A22;
+  --ok:#2E6B40;
+  --f-display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --f-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --measure:34rem;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#13151B;--card:#1C1F27;--ink:#ECEDE7;--ink-2:#A2A7B3;--rule:#3B404C;
+    --hi:#EDCF35;--hi-alpha:.28;--hi-ink:#13151B;--warn:#F08068;--ok:#7FC793;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#13151B;--card:#1C1F27;--ink:#ECEDE7;--ink-2:#A2A7B3;--rule:#3B404C;
+  --hi:#EDCF35;--hi-alpha:.28;--hi-ink:#13151B;--warn:#F08068;--ok:#7FC793;color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:1.0625rem;line-height:1.55;margin:0}
+.wrap{max-width:46rem;margin:0 auto;padding-inline:20px;padding-block:0 3rem}
+
+/* ---------- top bar ---------- */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:18px 10px}
+.brand{font-family:var(--f-display);font-variation-settings:"wdth" 70;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:.95rem;background:none;border:0;color:var(--ink);padding:0;cursor:pointer}
+.brand:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.email-btn{font-family:var(--f-mono);font-size:.8rem;background:none;border:1px solid var(--rule);color:var(--ink);padding:6px 10px;border-radius:3px;cursor:pointer}
+.email-btn:hover{border-color:var(--ink)}
+.email-btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* ---------- email panel ---------- */
+.email-panel{margin-block:4px 10px;padding:14px 16px;border:1px solid var(--ink);background:var(--card);display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;font-size:.95rem}
+.email-panel .addr{font-family:var(--f-mono);font-size:.95rem;user-select:all;word-break:break-all}
+.small-btn{font-family:var(--f-mono);font-size:.78rem;background:var(--ink);color:var(--paper);border:0;padding:6px 10px;border-radius:3px;cursor:pointer}
+.small-btn:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
+.email-panel a{color:var(--ink)}
+
+/* ---------- staff progress: treble clef, Presto, 1/4, one crotchet per bar from C4 up to C5 ---------- */
+@font-face{font-family:"PBT Clef";src:url(data:font/woff2;base64,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) format("woff2");font-display:block}
+.staff{margin-block:0 4px}
+.staff svg{display:block;width:100%;height:auto;max-width:100%;overflow:visible}
+.st-line{stroke:var(--ink);stroke-width:1.1}
+.st-bar{stroke:var(--ink);stroke-width:1.3}
+.st-thick{fill:var(--ink)}
+.st-hi{fill:var(--hi);opacity:var(--hi-alpha)}
+.st-clef{font-family:"PBT Clef","Noto Music","Bravura",serif;fill:var(--ink)}
+.st-tempo{font-family:var(--f-body);font-style:italic;font-weight:600;fill:var(--ink)}
+.st-time{font-family:var(--f-display);font-variation-settings:"wdth" 90;font-weight:900;fill:var(--ink)}
+.st-note{fill:var(--rule)}.st-stem{stroke:var(--rule);stroke-width:1.4}.st-ledger{stroke:var(--rule);stroke-width:1.1}
+.st-on .st-note{fill:var(--ink)}.st-on .st-stem,.st-on .st-ledger{stroke:var(--ink)}
+.st-now .st-note{animation:bob 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes bob{0%,100%{transform:rotate(-20deg) scale(1)}50%{transform:rotate(-20deg) scale(1.18)}}
+@media (prefers-reduced-motion: reduce){.st-now .st-note{animation:none}}
+.st-syl{font-family:var(--f-mono);font-size:11px;fill:var(--ink-2)}
+.staff-label{font-family:var(--f-mono);font-size:.72rem;color:var(--ink-2);margin-bottom:22px;text-align:right}
+
+/* ---------- stage & transitions ---------- */
+.stage{position:relative;overflow:hidden}
+.screen{animation:in-r .38s cubic-bezier(.2,.7,.2,1) both}
+.screen.back{animation-name:in-l}
+@keyframes in-r{from{transform:translateX(48px);opacity:0}to{transform:none;opacity:1}}
+@keyframes in-l{from{transform:translateX(-48px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){.screen{animation:none}.hl::before{animation:none!important}}
+
+/* ---------- hero ---------- */
+.hero{padding-block:22px 10px}
+.hero h1{font-family:var(--f-display);font-variation-settings:"wdth" 64;font-weight:900;text-transform:uppercase;line-height:.88;letter-spacing:-.005em;font-size:clamp(3.4rem,13vw,6.6rem);margin:0 0 22px;text-wrap:balance}
+.hl{position:relative;display:inline-block;z-index:0;color:var(--hi-ink)}
+.hl::before{content:"";position:absolute;z-index:-1;left:-.06em;right:-.06em;top:.18em;bottom:.04em;background:var(--hi);transform-origin:left center;transform:skewX(-6deg);animation:swipe .7s .25s cubic-bezier(.3,.8,.3,1) both}
+@keyframes swipe{from{transform:skewX(-6deg) scaleX(0)}to{transform:skewX(-6deg) scaleX(1)}}
+.lede{font-size:1.25rem;line-height:1.45;max-width:var(--measure);margin:0 0 10px}
+.sub{color:var(--ink-2);max-width:var(--measure);margin:0 0 26px}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1.5px solid var(--ink);border-bottom:1px solid var(--rule);margin-block:28px 30px}
+.facts div{padding:12px 12px 14px 0}
+.facts div+div{padding-left:12px;border-left:1px solid var(--rule)}
+.facts b{display:block;font-family:var(--f-display);font-variation-settings:"wdth" 75;font-weight:800;font-size:1.05rem;text-transform:uppercase;letter-spacing:.02em}
+.facts span{font-size:.92rem;color:var(--ink-2)}
+@media (max-width:560px){.facts{grid-template-columns:1fr}.facts div+div{padding-left:0;border-left:0;border-top:1px solid var(--rule)}}
+.or-email{font-size:.95rem;color:var(--ink-2);margin-top:14px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.or-email .addr{font-family:var(--f-mono);color:var(--ink);user-select:all;word-break:break-all}
+
+/* ---------- question ---------- */
+.q-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:8px}
+.mark{flex:none;font-family:var(--f-display);font-variation-settings:"wdth" 80;font-weight:800;font-size:1.25rem;line-height:1;border:2px solid var(--ink);padding:6px 8px 5px;min-width:2.2em;text-align:center}
+.q-head h2{font-family:var(--f-display);font-variation-settings:"wdth" 78;font-weight:800;font-size:clamp(1.6rem,5vw,2.25rem);line-height:1.05;margin:0;text-wrap:balance;min-width:0}
+.q-help{color:var(--ink-2);max-width:var(--measure);margin:6px 0 22px}
+
+.opts{display:grid;gap:10px;max-width:var(--measure)}
+.opt{display:flex;align-items:flex-start;gap:12px;padding:13px 14px;border:1px solid var(--rule);background:var(--card);cursor:pointer;text-align:left;font:inherit;color:var(--ink);border-radius:3px;width:100%}
+.opt:hover{border-color:var(--ink)}
+.opt:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.opt .box{flex:none;width:18px;height:18px;margin-top:3px;border:1.5px solid var(--ink);border-radius:2px;position:relative}
+.opt.radio .box{border-radius:50%}
+.opt[aria-pressed="true"],.opt[aria-checked="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.opt[aria-pressed="true"] .box,.opt[aria-checked="true"] .box{background:var(--hi)}
+.opt[aria-pressed="true"] .box::after,.opt[aria-checked="true"] .box::after{content:"";position:absolute;left:5px;top:1px;width:5px;height:10px;border:solid var(--hi-ink);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.opt .t{min-width:0}
+.opt .t small{display:block;color:var(--ink-2);font-size:.86rem;margin-top:2px}
+
+label.f{display:block;font-family:var(--f-mono);font-size:.78rem;letter-spacing:.03em;color:var(--ink-2);margin-bottom:5px}
+input[type=text],input[type=email],input[type=tel],input[type=number],textarea,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:10px 12px;width:100%}
+input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--ink);outline-offset:1px;border-color:var(--ink)}
+textarea{min-height:5.5rem;resize:vertical}
+.field{margin-bottom:16px;max-width:var(--measure)}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+.row>*{min-width:0}
+.date{display:grid;grid-template-columns:5rem minmax(0,1fr) 6.5rem;gap:8px;max-width:22rem}
+
+.feedback{max-width:var(--measure);margin-top:6px;padding:12px 14px;border-left:4px solid var(--hi);background:var(--card);font-size:.98rem}
+.feedback:empty{display:none}
+.feedback.warn{border-left-color:var(--warn)}
+.err{color:var(--warn);font-size:.95rem;margin-top:12px;min-height:1.4em;max-width:var(--measure)}
+
+/* line-up */
+.lineup{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:8px;margin-bottom:14px}
+.inst{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 8px 8px 12px;border:1px solid var(--rule);background:var(--card);border-radius:3px}
+.inst.on{border-color:var(--ink)}
+.inst .n{min-width:0;font-size:.98rem}
+.step{display:flex;align-items:center;gap:4px;flex:none}
+.step button{width:32px;height:32px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);font:500 1.1rem/1 var(--f-mono);border-radius:3px;cursor:pointer}
+.step button:hover{border-color:var(--ink)}
+.step button:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.step output{min-width:1.6em;text-align:center;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.inst.on .step output{background:var(--hi);color:var(--hi-ink);border-radius:2px}
+.lineup-sum{font-family:var(--f-mono);font-size:.88rem;padding:10px 12px;border:1px dashed var(--rule);margin-bottom:16px;word-break:break-word}
+
+/* pieces */
+.piece{border:1px solid var(--rule);background:var(--card);padding:14px;border-radius:3px;margin-bottom:12px;max-width:var(--measure)}
+.piece-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-family:var(--f-mono);font-size:.78rem;color:var(--ink-2)}
+.link-btn{background:none;border:0;padding:0;font:inherit;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.link-btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.len{display:grid;grid-template-columns:5.5rem 5.5rem;gap:8px}
+
+/* nav */
+.nav{display:flex;align-items:center;gap:14px;margin-top:26px;flex-wrap:wrap}
+.go{font-family:var(--f-display);font-variation-settings:"wdth" 85;font-weight:800;text-transform:uppercase;letter-spacing:.04em;font-size:1rem;background:var(--ink);color:var(--paper);border:0;padding:14px 22px;border-radius:3px;cursor:pointer}
+.go:hover{background:var(--ink);box-shadow:4px 4px 0 var(--hi)}
+.go:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+.back-btn{background:none;border:0;font:inherit;color:var(--ink-2);cursor:pointer;padding:6px 0}
+.back-btn:hover{color:var(--ink)}
+.back-btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.hint{font-family:var(--f-mono);font-size:.72rem;color:var(--ink-2)}
+
+/* summary */
+.sheet{border-top:2px solid var(--ink);margin-top:8px}
+.sheet .r{display:grid;grid-template-columns:9rem minmax(0,1fr) auto;gap:6px 14px;padding:12px 0;border-bottom:1px solid var(--rule);align-items:baseline}
+.sheet .k{font-family:var(--f-mono);font-size:.76rem;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em}
+.sheet .v{min-width:0;word-break:break-word}
+@media (max-width:560px){.sheet .r{grid-template-columns:minmax(0,1fr) auto}.sheet .k{grid-column:1/-1}}
+.quote{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin-top:24px;border:2px solid var(--ink);background:var(--card)}
+.quote>div{padding:16px 18px}
+.quote>div+div{border-left:1px solid var(--rule)}
+.quote .lab{font-family:var(--f-mono);font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2)}
+.quote .big{font-family:var(--f-display);font-variation-settings:"wdth" 75;font-weight:900;font-size:2.1rem;line-height:1.1;margin:4px 0;font-variant-numeric:tabular-nums}
+.quote .big.word{font-size:1.5rem}
+.quote p{margin:0;font-size:.9rem;color:var(--ink-2)}
+@media (max-width:560px){.quote{grid-template-columns:1fr}.quote>div+div{border-left:0;border-top:1px solid var(--rule)}}
+.terms{font-size:.9rem;color:var(--ink-2);margin-top:14px;max-width:var(--measure)}
+.fine-mark{display:flex;align-items:center;gap:12px;font-family:var(--f-display);font-variation-settings:"wdth" 70;font-weight:900;font-size:1.1rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.fine-mark i{display:inline-block;width:10px;height:30px;border-left:1.5px solid var(--ink);border-right:5px solid var(--ink)}
+
+/* stop + sent */
+.stop h2{font-family:var(--f-display);font-variation-settings:"wdth" 78;font-weight:900;font-size:clamp(1.8rem,6vw,2.6rem);line-height:1;margin:0 0 16px;text-wrap:balance}
+.stop p{max-width:var(--measure)}
+.stop .tag{display:inline-block;font-family:var(--f-mono);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;border:1.5px solid var(--warn);color:var(--warn);padding:3px 7px;margin-bottom:14px}
+.stop .tag.ok{border-color:var(--ok);color:var(--ok)}
+.preview-note{font-family:var(--f-mono);font-size:.78rem;color:var(--ink-2);border:1px dashed var(--rule);padding:8px 10px;max-width:var(--measure);margin-top:18px}
+
+footer{margin-top:56px;padding-top:14px;border-top:1px solid var(--rule);font-size:.85rem;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
+/* ---------- more about the service ---------- */
+.who{display:grid;grid-template-columns:minmax(0,11rem) minmax(0,1fr);gap:8px 28px;padding-block:6px 30px}
+.who h3,.more-h{font-family:var(--f-display);font-variation-settings:"wdth" 75;font-weight:800;text-transform:uppercase;letter-spacing:.03em;font-size:1.05rem;margin:0;line-height:1.2}
+.who p{margin:0 0 10px;max-width:var(--measure)}
+.who .sig{font-family:var(--f-mono);font-size:.82rem;color:var(--ink-2)}
+@media (max-width:560px){.who{grid-template-columns:1fr}}
+.more{border-top:1.5px solid var(--ink)}
+.more details{border-bottom:1px solid var(--rule)}
+.more summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 0}
+.more summary::-webkit-details-marker{display:none}
+.more summary:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.more summary .pm{font-family:var(--f-mono);font-size:1.1rem;width:1.4em;text-align:center;flex:none;transition:transform .2s}
+.more details[open] summary .pm{transform:rotate(45deg)}
+.more summary .lead{color:var(--ink-2);font-size:.92rem;margin-left:auto;margin-right:6px;text-align:right}
+@media (max-width:560px){.more summary .lead{display:none}}
+.more .body{padding:0 0 22px;max-width:var(--measure)}
+.more .body p{margin:0 0 10px}
+.steps{margin:0;padding:0;list-style:none;display:grid;gap:12px;counter-reset:st}
+.steps li{display:grid;grid-template-columns:2rem minmax(0,1fr);gap:10px;counter-increment:st}
+.steps li::before{content:counter(st);font-family:var(--f-display);font-weight:800;border:2px solid var(--ink);height:1.8rem;display:grid;place-items:center;font-size:.95rem}
+.fixes{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.fixes b{display:block}
+.rates-wrap{overflow-x:auto}
+.rates{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+.rates td{padding:9px 0;border-bottom:1px solid var(--rule);vertical-align:baseline}
+.rates td:last-child{text-align:right;font-family:var(--f-mono);white-space:nowrap;padding-left:16px}
+.rates tr.sub td{color:var(--ink-2);font-size:.92rem}
+.again{margin-top:30px}
+.rates-block{padding-top:0}
+.rates-block .rates-wrap{max-width:var(--measure)}
+/* ---------- desktop: same single column, tighter vertical rhythm so the landing fits one screen ---------- */
+@media (min-width:900px){
+  .wrap{padding-block:0 1rem}
+  .top{padding-block:12px 0}
+  .hero{padding-block:10px 0}
+  .hero h1{font-size:clamp(3.6rem,8vh,5.4rem);margin-bottom:12px}
+  .lede{margin-bottom:4px}
+  .sub{margin-bottom:16px}
+  .hero-main{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:20px}
+  .hero-main h1,.hero-main .lede,.hero-main .sub{grid-column:1/-1}
+  .hero-main .or-email{margin-top:0}
+  .hero-main .or-email{flex-wrap:nowrap;white-space:nowrap}
+  .hero-main .or-email .lab-long{display:none}
+  .hero-main .or-email .lab-short{display:inline}
+  .facts{margin-block:18px 14px}
+  .facts div{padding-block:8px 9px}
+  .more summary{padding:9px 0}
+  .more .body{padding-bottom:14px}
+  .again{display:none}
+  footer{margin-top:18px;padding-top:10px}
+}
+.or-email .lab-short{display:none}
+@media (max-width:560px){
+  .or-email{flex-wrap:nowrap;gap:8px;font-size:.9rem;white-space:nowrap}
+  .or-email .lab-long{display:none}
+  .or-email .lab-short{display:inline}
+  .or-email .addr{font-size:.8rem;word-break:normal;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .or-email .small-btn{flex:none}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <button class="brand" id="brand" type="button">Short Notice Arranging</button>
+    <button class="email-btn" id="emailToggle" type="button" aria-expanded="false" aria-controls="emailPanel">Email instead</button>
+  </header>
+  <div class="email-panel" id="emailPanel" hidden>
+    <span>Email:</span>
+    <span class="addr" id="addr1">russell.music.uk@gmail.com</span>
+    <button class="small-btn" type="button" data-copy="russell.music.uk@gmail.com">Copy</button>
+    <a href="mailto:russell.music.uk@gmail.com">Open in mail app</a>
+  </div>
+
+  <div id="staffWrap" hidden>
+    <div class="staff" id="staff" aria-hidden="true"></div>
+    <div class="staff-label" id="staffLabel"></div>
+  </div>
+
+  <main class="stage" id="stage" aria-live="polite"></main>
+
+  <footer>
+    <span>Short-notice re-scoring for bands and orchestras.</span>
+    <span>russell.music.uk@gmail.com</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+const EMAIL = "russell.music.uk@gmail.com";
+const MIN_FEE = 0;            // per-job minimum charge in £; 0 = off
+const MIN_MINUTES = 3;
+const NEW_ARR = 1.5;         // new arrangement / orchestration = rescue rate x 1.5
+const MIN_PER_DAY = 5;      // minutes of finished music promised per working day
+
+/* ---------- data ---------- */
+const PROBLEMS = [
+  ["absent","Someone can't make it","A player has dropped out and nobody can cover the part."],
+  ["fewer","Fewer players than planned","The band on the night is smaller than the one the music was written for."],
+  ["hard","A part is too high or too hard","It needs rewriting for the player you've got."],
+  ["noversion","No version fits the line-up","The piece exists for other forces and needs re-scoring."],
+  ["other","Something else",""]
+];
+const GROUPS = [
+  ["wind","Concert or wind band"],["brass","Brass band"],["orch","Orchestra"],["strings","String orchestra"],
+  ["chamber","Small ensemble"],["other","Something else"]
+];
+const ORCH = [["fl","Flute"],["ob","Oboe"],["cl","Clarinet"],["bsn","Bassoon"],["hn","Horn"],["tpt","Trumpet"],["tbn","Trombone"],["tba","Tuba"],["timp","Timpani"],["perc","Percussion"],["hp","Harp"],["pno","Piano"],["vn1","Violin I"],["vn2","Violin II"],["va","Viola"],["vc","Cello"],["db","Double bass"]];
+const INSTR = {
+  wind:[["picc","Piccolo"],["fl","Flute"],["ob","Oboe"],["bsn","Bassoon"],["ebcl","Eb clarinet"],["cl1","1st clarinet"],["cl2","2nd clarinet"],["cl3","3rd clarinet"],["bcl","Bass clarinet"],["asx1","1st alto sax"],["asx2","2nd alto sax"],["tsx","Tenor sax"],["bsx","Baritone sax"],["tpt1","1st trumpet / cornet"],["tpt2","2nd trumpet / cornet"],["tpt3","3rd trumpet / cornet"],["hn1","1st horn in F"],["hn2","2nd horn in F"],["hn3","3rd horn in F"],["hn4","4th horn in F"],["tbn1","1st trombone"],["tbn2","2nd trombone"],["btbn","Bass trombone"],["euph","Euphonium"],["tba","Tuba"],["sb","String bass"],["timp","Timpani"],["perc","Percussion"],["kbd","Piano / keys"]],
+  brass:[["sop","Soprano cornet"],["solo","Solo cornet"],["rep","Repiano cornet"],["cnt2","2nd cornet"],["cnt3","3rd cornet"],["flug","Flugelhorn"],["shn","Solo horn"],["thn1","1st horn"],["thn2","2nd horn"],["bar1","1st baritone"],["bar2","2nd baritone"],["tbn1","1st trombone"],["tbn2","2nd trombone"],["btbn","Bass trombone"],["euph","Euphonium"],["ebb","Eb bass"],["bbb","Bb bass"],["perc","Percussion"]],
+  orch:ORCH,
+  strings:[["vn1","Violin I"],["vn2","Violin II"],["va","Viola"],["vc","Cello"],["db","Double bass"],["pno","Piano"]],
+  chamber:ORCH
+};
+const SHORT = {picc:"Picc",ebcl:"Eb Cl",cl1:"Cl 1",cl2:"Cl 2",cl3:"Cl 3",asx1:"A.Sx 1",asx2:"A.Sx 2",tpt1:"Tpt 1",tpt2:"Tpt 2",tpt3:"Tpt 3",hn1:"Hn 1",hn2:"Hn 2",hn3:"Hn 3",hn4:"Hn 4",tbn1:"Tbn 1",tbn2:"Tbn 2",sb:"Str.B",solo:"Solo Cnt",rep:"Rep",cnt2:"Cnt 2",cnt3:"Cnt 3",shn:"Solo Hn",thn1:"Hn 1",thn2:"Hn 2",bar1:"Bar 1",bar2:"Bar 2",fl:"Fl",ob:"Ob",cl:"Cl",bsn:"Bsn",hn:"Hn",tpt:"Tpt",tbn:"Tbn",tba:"Tba",timp:"Timp",perc:"Perc",hp:"Hp",pno:"Pno",vn1:"Vn I",vn2:"Vn II",va:"Va",vc:"Vc",db:"Db",bcl:"B.Cl",asx:"A.Sx",tsx:"T.Sx",bsx:"B.Sx",euph:"Euph",kbd:"Kbd",sop:"Sop.Cnt",cnt:"Cnt",flug:"Flug",thn:"T.Hn",bar:"Bar",btbn:"B.Tbn",ebb:"Eb Bass",bbb:"Bb Bass",s:"S",a:"A",t:"T",b:"B",kbd1:"Kbd 1",kbd2:"Kbd 2",reed:"Reeds",gtr:"Gtr",bass:"Bass",dr:"Dr",vn:"Vn"};
+const MATERIALS = [
+  ["score","Full score"],["parts","Parts"],["piano","Piano or vocal score","Orchestrating from a piano score is a new arrangement: arranging rates apply."],
+  ["melody","Melody or lead sheet only","That makes it a new arrangement: arranging rates apply, plus one extra day."],
+  ["audio","A recording only","A new arrangement: arranging rates apply, plus one extra day. The recording is checked before the job is confirmed."],
+  ["none","Nothing yet","Something to work from is needed before the clock starts."]
+];
+const RIGHTS = [
+  ["original","Original","Written by you or for you, and the composer agrees."],
+  ["pd","Public domain","The composer died more than 70 years ago. If you're using a modern edition, the edition itself may still be in copyright."],
+  ["cleared","Cleared","You have the publisher's permission to arrange it."],
+  ["unsure","Not sure",""],
+  ["licensed","A licensed show","From MTI, R&H, Concord or another licensor."]
+];
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const LONGDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+/* ---------- state ---------- */
+const blank = () => ({
+  step:0, editing:false,
+  problems:[], problemOther:"",
+  concert:{d:"",m:"",y:""}, needBy:{d:"",m:"",y:""},
+  group:"", lineup:{}, lineupOther:"", lineupNotes:"",
+  pieces:[{title:"",composer:"",min:"",sec:""}],
+  materials:[], rights:"",
+  contact:{group:"",name:"",email:"",phone:""}
+});
+let S = (window.claude && window.claude.hot && window.claude.hot.data && window.claude.hot.data.S) || blank();
+if (window.claude && window.claude.hot && window.claude.hot.snapshot) { try{ window.claude.hot.snapshot(() => ({S})); }catch(e){} }
+
+const $ = (s, el=document) => el.querySelector(s);
+const stage = $("#stage");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- dates ---------- */
+function today(){ const t=new Date(); return new Date(t.getFullYear(),t.getMonth(),t.getDate()); }
+function toDate(o){ if(!o.d||!o.m||!o.y) return null; const d=new Date(+o.y,+o.m-1,+o.d); return d.getMonth()===+o.m-1 ? d : null; }
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+function fmt(d){ return DAYS[d.getDay()]+" "+d.getDate()+" "+MONTHS[d.getMonth()]; }
+
+/* ---------- calculations ---------- */
+function totalMinutes(){
+  return S.pieces.reduce((s,p)=> s + (parseFloat(p.min)||0) + (parseFloat(p.sec)||0)/60, 0);
+}
+function partsCount(){ return Object.values(S.lineup).filter(n=>n>0).length; }
+function playersCount(){ return Object.values(S.lineup).reduce((s,n)=>s+(n||0),0); }
+/* Launch rates, £ per minute of finished music.
+   Quartet base £49; each instrument beyond four +15% of base; piano +20% on any line-up;
+   band, woodwind-and-strings and full orchestra are the old launch rates +20%. */
+const R = {quartet:49, perExtra:0.15, piano:0.20, band:74.40, fullOrch:90, wwStrings:70.20, wwExtra:9};
+function withPiano(r, label, piano){
+  return piano ? {r:Math.round(r*(1+R.piano)*100)/100, label:label+" with piano"} : {r, label};
+}
+function rate(){
+  const L=S.lineup, has=k=>(L[k]||0)>0;
+  switch(S.group){
+    case "wind": return withPiano(R.band,"Wind band",has("kbd"));
+    case "brass": return {r:R.band,label:"Brass band"};
+    case "strings": return withPiano(R.quartet,"String orchestra",has("pno"));
+    case "orch": {
+      if (has("tpt")||has("tbn")||has("tba")) return withPiano(R.fullOrch,"Full orchestra",has("pno"));
+      const base={fl:2,ob:2,cl:2,bsn:2,hn:2,perc:2,timp:2};
+      let extra = has("hp") ? 1 : 0;
+      for(const k in base){ if((L[k]||0)>base[k]) extra++; }
+      return withPiano(R.wwStrings+R.wwExtra*extra,"Woodwind and string orchestra",has("pno"));
+    }
+    case "chamber": {
+      const pianoKey = "pno";
+      const n = Object.entries(L).filter(([k,v])=>v>0 && k!==pianoKey).reduce((s,[,v])=>s+v,0);
+      if (n===0 && !has(pianoKey)) return null;
+      const r = Math.round(R.quartet*(1+R.perExtra*Math.max(0,n-4))*100)/100;
+      return withPiano(r, Math.max(n,1)+"-instrument ensemble", has(pianoKey));
+    }
+    default: return null;
+  }
+}
+function isNewArrangement(){ return !S.materials.some(m=>["score","parts"].includes(m)); }
+function estimate(){
+  const rt = rate(); const mins = totalMinutes();
+  if(!rt || mins<=0) return null;
+  const fresh = isNewArrangement();
+  const r = fresh ? Math.round(rt.r*NEW_ARR*100)/100 : rt.r;
+  const label = fresh ? "New arrangement, "+rt.label.charAt(0).toLowerCase()+rt.label.slice(1) : rt.label;
+  const billed = Math.max(MIN_MINUTES, mins);
+  const fee = Math.max(MIN_FEE, Math.round(r*billed));
+  return {fee, rt:{r,label}, billed};
+}
+function workDays(){
+  const mins = totalMinutes();
+  let d = Math.max(1, Math.ceil(mins/MIN_PER_DAY - 1e-9));
+  if (S.materials.includes("melody") || S.materials.includes("audio")) {
+    const full = S.materials.some(m=>["score","parts","piano"].includes(m));
+    if(!full) d += 1;
+  }
+  return d;
+}
+function deliveryDate(){ return addDays(today(), workDays()+1); }
+function money(n){ return "£"+n.toLocaleString("en-GB",{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2}); }
+function lineupText(){
+  const list = INSTR[S.group]||[];
+  const bits = list.filter(([k])=>S.lineup[k]>0).map(([k])=>S.lineup[k]+" "+(SHORT[k]||k));
+  return bits.join(", ");
+}
+
+/* ---------- staff ---------- */
+const STAFF = {W:800, H:104, top:44, gap:10, x0:70, x1:792};
+const SCALE = [["C",94,"do"],["D",89,"re"],["E",84,"mi"],["F",79,"fa"],["G",74,"sol"],["A",69,"la"],["B",64,"si"],["C",59,"do"]];
+function drawStaff(){
+  const wrap=$("#staffWrap"), staff=$("#staff"), lab=$("#staffLabel");
+  const s=S.step;
+  const show = typeof s==="number" && s>=1 && s<=9;
+  wrap.hidden = !show;
+  if(!show) return;
+  const {H,top,gap,x0}=STAFF, bot=top+4*gap;
+  const cw = staff.getBoundingClientRect().width || 800;
+  const w = cw<560 ? 50 : (STAFF.x1-6-x0)/8;      // narrower bars on phones so the staff stays legible
+  const x1 = x0+8*w+6, W = x1;
+  let g='';
+  for(let i=0;i<8;i++){ if(i+1<s) g+='<rect class="st-hi" x="'+(x0+i*w+3)+'" y="'+(top-4)+'" width="'+(w-6)+'" height="'+(4*gap+8)+'"/>'; }
+  for(let i=0;i<5;i++){ const y=top+i*gap; g+='<line class="st-line" x1="0" y1="'+y+'" x2="'+x1+'" y2="'+y+'"/>'; }
+  g+='<line class="st-bar" x1="0" y1="'+top+'" x2="0" y2="'+bot+'"/>';
+  g+='<text class="st-clef" x="5" y="'+bot+'" font-size="40">\u{1D11E}</text>';
+  g+='<text class="st-tempo" x="0" y="20" font-size="17">Presto</text>';
+  g+='<text class="st-time" x="52" y="'+(top+2*gap-1)+'" font-size="23" text-anchor="middle">1</text>';
+  g+='<text class="st-time" x="52" y="'+(bot-1)+'" font-size="23" text-anchor="middle">4</text>';
+  for(let i=1;i<8;i++){ const x=x0+i*w; g+='<line class="st-bar" x1="'+x+'" y1="'+top+'" x2="'+x+'" y2="'+bot+'"/>'; }
+  g+='<line class="st-bar" x1="'+(x1-6)+'" y1="'+top+'" x2="'+(x1-6)+'" y2="'+bot+'"/><rect class="st-thick" x="'+(x1-3.5)+'" y="'+top+'" width="3.5" height="'+(4*gap)+'"/>';
+  SCALE.forEach(([n,y,syl],i)=>{
+    const bar=i+1, cx=x0+i*w+w/2;
+    const cls = bar<s||s===9 ? "st-on" : bar===s ? "st-on st-now" : "";
+    let note='<g class="'+cls+'">';
+    if(y>=bot+gap){ note+='<line class="st-ledger" x1="'+(cx-11)+'" y1="'+y+'" x2="'+(cx+11)+'" y2="'+y+'"/>'; }
+    const up = y>top+2*gap;
+    note+= up ? '<line class="st-stem" x1="'+(cx+5.6)+'" y1="'+(y-1)+'" x2="'+(cx+5.6)+'" y2="'+(y-35)+'"/>'
+              : '<line class="st-stem" x1="'+(cx-5.6)+'" y1="'+(y+1)+'" x2="'+(cx-5.6)+'" y2="'+(y+35)+'"/>';
+    note+='<ellipse class="st-note" cx="'+cx+'" cy="'+y+'" rx="6.3" ry="4.4" transform="rotate(-20 '+cx+' '+y+')"/>';
+    note+='</g>';
+    g+=note;
+  });
+  staff.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Progress: bar '+Math.min(s,8)+' of 8">'+g+'</svg>';
+  lab.textContent = s===9 ? "Fine" : "Bar "+s+" of 8";
+}
+
+/* ---------- navigation ---------- */
+let dir = 1;
+function go(step, back){
+  dir = back ? -1 : 1;
+  S.step = step;
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function next(){
+  if(!validate()) return;
+  if(S.step===7 && (S.rights==="unsure"||S.rights==="licensed")){ go("stop-"+S.rights); return; }
+  if(S.editing){ S.editing=false; go(9); return; }
+  go(S.step+1);
+}
+function prev(){ if(S.step===1) go(0,true); else go(S.step-1,true); }
+
+/* ---------- validation ---------- */
+function setErr(msg){ const e=$("#err"); if(e) e.textContent=msg||""; return !msg; }
+function validate(){
+  const s=S.step;
+  if(s===1){
+    if(!S.problems.length) return setErr("Pick at least one.");
+    if(S.problems.includes("other") && !S.problemOther.trim()) return setErr("Say briefly what's gone wrong.");
+  }
+  if(s===2){
+    const c=toDate(S.concert), n=toDate(S.needBy);
+    if(!c) return setErr("Add the concert date.");
+    if(!n) return setErr("Add the date you need the parts by.");
+    if(n<today()) return setErr("That date has already passed.");
+    if(n>c) return setErr("The parts are needed after the concert. Check the two dates.");
+  }
+  if(s===3 && !S.group) return setErr("Choose the kind of group.");
+  if(s===4){
+    if(S.group==="other"){ if(!S.lineupOther.trim()) return setErr("List the instruments you'll have."); }
+    else if(!playersCount()) return setErr("Add at least one player.");
+  }
+  if(s===5){
+    for(const [i,p] of S.pieces.entries()){
+      if(!p.title.trim()) return setErr("Add a title for piece "+(i+1)+".");
+      if(!((parseFloat(p.min)||0)+(parseFloat(p.sec)||0))) return setErr("Add a rough length for piece "+(i+1)+".");
+    }
+  }
+  if(s===6 && !S.materials.length) return setErr("Tick what you've got, even if it's nothing yet.");
+  if(s===7 && !S.rights) return setErr("Choose one.");
+  if(s===8){
+    const c=S.contact;
+    if(!c.group.trim()) return setErr("Add the group's name.");
+    if(!c.name.trim()) return setErr("Add your name.");
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email.trim())) return setErr("That email address doesn't look complete.");
+  }
+  return setErr("");
+}
+
+/* ---------- builders ---------- */
+function head(n, title, help){
+  return '<div class="q-head"><span class="mark">'+n+'</span><h2>'+title+'</h2></div>'+(help?'<p class="q-help">'+help+'</p>':'<div style="height:18px"></div>');
+}
+function navHtml(label){
+  const lab = label || (S.editing ? "Back to the summary" : "Next bar");
+  return '<div class="err" id="err" role="alert"></div><div class="nav"><button class="go" id="next" type="button">'+lab+'</button><button class="back-btn" id="prev" type="button">← Back</button><span class="hint">or press Enter</span></div>';
+}
+function optList(items, selected, multi, name){
+  return '<div class="opts" role="'+(multi?"group":"radiogroup")+'">'+items.map(([k,t,sub])=>{
+    const on = multi ? selected.includes(k) : selected===k;
+    const attr = multi ? 'aria-pressed="'+on+'"' : 'role="radio" aria-checked="'+on+'"';
+    return '<button type="button" class="opt'+(multi?"":" radio")+'" data-'+name+'="'+k+'" '+attr+'><span class="box"></span><span class="t">'+esc(t)+(sub?'<small>'+esc(sub)+'</small>':'')+'</span></button>';
+  }).join("")+'</div>';
+}
+function dateHtml(id, o){
+  const y0 = today().getFullYear();
+  let d='<option value="">Day</option>'; for(let i=1;i<=31;i++) d+='<option'+(String(i)===o.d?' selected':'')+'>'+i+'</option>';
+  let m='<option value="">Month</option>'; MONTHS.forEach((mm,i)=>{ m+='<option value="'+(i+1)+'"'+(String(i+1)===o.m?' selected':'')+'>'+mm+'</option>'; });
+  let y='<option value="">Year</option>'; for(const yy of [y0,y0+1]) y+='<option'+(String(yy)===o.y?' selected':'')+'>'+yy+'</option>';
+  return '<div class="date"><select id="'+id+'-d" aria-label="Day">'+d+'</select><select id="'+id+'-m" aria-label="Month">'+m+'</select><select id="'+id+'-y" aria-label="Year">'+y+'</select></div>';
+}
+
+/* ---------- screens ---------- */
+const screens = {
+0(){
+  return '<section class="hero">'+
+    '<div class="hero-main">'+
+    '<h1><span class="hl">Short Notice</span> Arranging</h1>'+
+    '<p class="lede">Reductions, re-scoring and rewritten parts for the players who actually turn up.</p>'+
+    '<p class="sub">For bands and orchestras. Weekends included.</p>'+
+    '<button class="go" id="start" type="button">Start: eight short questions</button>'+
+    '<div class="or-email"><span class="lab-long">Rather just email?</span><span class="lab-short">Or email</span> <span class="addr">'+EMAIL+'</span><button class="small-btn" type="button" data-copy="'+EMAIL+'">Copy</button></div>'+
+    '</div>'+
+    '<div class="hero-side">'+
+    '<div class="facts">'+
+      '<div><b>Send it today</b><span>Up to '+MIN_PER_DAY+' minutes of music: parts by '+LONGDAYS[addDays(today(),2).getDay()]+', 10am UK time.</span></div>'+
+      '<div><b>From £49 a minute</b><span>Launch rates. Score, parts and an audio preview included.</span></div>'+
+      '<div><b>Permission first</b><span>Originals, public-domain works, or music you’ve cleared with the publisher.</span></div>'+
+    '</div>'+
+    '<div class="more">'+
+      moreItem("What gets fixed","Parts by Thursday",
+        '<ul class="fixes">'+
+        '<li><b>A player drops out.</b>Their lines go to the people you have, so nothing important disappears.</li>'+
+        '<li><b>The band is smaller than the music.</b>Reduced to the players on the night, part by part.</li>'+
+        '<li><b>A part sits too high or too hard.</b>Rewritten for the player in the chair, without changing the piece.</li>'+
+        '<li><b>Your line-up isn\u2019t catered for.</b>An existing version, re-scored for exactly who you have.</li>'+
+        '<li><b>You need a new arrangement, fast.</b>From a melody, a lead sheet or a recording, written to your line-up and your date.</li>'+
+        '</ul>')+
+      moreItem("Rates","From \u00a349 a minute",
+      '<div>'+'<div class="rates-wrap"><table class="rates"><tbody>'+
+        '<tr><td>String quartet, or any four instruments</td><td>£49</td></tr>'+
+        '<tr class="sub"><td>Each extra instrument</td><td>+£7.35</td></tr>'+
+        '<tr><td>String orchestra</td><td>£49</td></tr>'+
+        '<tr><td>Woodwind and string orchestra</td><td>£70.20</td></tr>'+
+        '<tr><td>Wind band or brass band</td><td>£74.40</td></tr>'+
+        '<tr><td>Full orchestra</td><td>£90</td></tr>'+
+        '<tr class="sub"><td>Piano in any line-up</td><td>+20%</td></tr>'+
+        '<tr><td>New arrangement or orchestration, from a melody, lead sheet or recording</td><td>from \u00a373.50</td></tr>'+
+        '</tbody></table></div>'+
+        '<p style="margin-top:12px;color:var(--ink-2);font-size:.92rem">Per minute of finished music, for adapting a score or parts you already have. Launch rates. Three minutes minimum.</p>'+'</div>')+
+      moreItem("How it works","Three steps",
+        '<ol class="steps">'+
+        '<li><span>Answer eight short questions. It takes about three minutes.</span></li>'+
+        '<li><span>A reply follows with a fixed price and a delivery time, usually within a few hours.</span></li>'+
+        '<li><span>Sign, pay a 50% deposit and send your material. Work starts the next day, weekends included, and the parts arrive by 10am UK time.</span></li>'+
+        '</ol>'+
+        '<p style="margin-top:14px">You get a transposed score, a concert-pitch score, every part, and an audio preview, with two rounds of changes.</p>')+
+      moreItem("Who writes the parts","Composer & orchestrator",
+      '<div><p>A composer and orchestrator with twenty years of writing for real players. Orchestrations of five operas, and work for the China National Opera House and the China National Symphony Orchestra, including a reduced <i>La traviata</i> they have performed many times.</p>'+
+      '<p>Three original works for symphonic wind band, three for marching band, and a 2019 commission for the Royal Edinburgh Military Tattoo. Once took a four-act opera from a single melody line to full score in three weeks.</p>'+
+      '<p class="sig">Every job is written or checked by the same orchestrator.</p></div>')+
+      moreItem("The small print","Copyright and the rest",
+        '<p>Arranging someone else’s music needs the publisher’s permission, and getting it is your side of the deal. PRS and MCPS licences don’t cover arranging.</p>'+
+        '<p>Licensed shows from MTI, R&amp;H, Concord and others must be performed as written, so they are never altered.</p>'+
+        '<p>Once the balance is paid, the arrangement is yours to perform, with a credit to the arranger.</p>')+
+    '</div>'+
+    '</div>'+
+    '<div class="again"><button class="go" id="start2" type="button">Start: eight short questions</button></div>'+
+  '</section>';
+},
+1(){
+  return head(1,"What’s gone wrong?","Tick everything that applies.")+
+    optList(PROBLEMS,S.problems,true,"prob")+
+    '<div class="field" id="otherWrap" style="margin-top:12px"'+(S.problems.includes("other")?'':' hidden')+'><label class="f" for="probOther">What happened</label><textarea id="probOther">'+esc(S.problemOther)+'</textarea></div>'+
+    navHtml();
+},
+2(){
+  return head(2,"When’s the concert, and when do you need the parts?","Give yourself a rehearsal with the new parts if you can.")+
+    '<div class="field"><label class="f">Concert date</label>'+dateHtml("concert",S.concert)+'</div>'+
+    '<div class="field"><label class="f">Parts needed by</label>'+dateHtml("need",S.needBy)+'</div>'+
+    '<div class="feedback" id="dateFb"></div>'+navHtml();
+},
+3(){
+  return head(3,"What kind of group are you?","")+optList(GROUPS,S.group,false,"grp")+navHtml();
+},
+4(){
+  if(S.group==="other"){
+    return head(4,"Who’s actually turning up?","List each instrument and how many.")+
+      '<div class="field"><label class="f" for="lineupOther">Instruments</label><textarea id="lineupOther" placeholder="e.g. 2 recorders, 1 ukulele, piano">'+esc(S.lineupOther)+'</textarea></div>'+
+      notesField()+navHtml();
+  }
+  const list=INSTR[S.group]||[];
+  return head(4,"Who’s actually turning up?","Count the players you’ll have on the night, not the ones on the original parts.")+
+    '<div class="lineup">'+list.map(([k,n])=>{
+      const v=S.lineup[k]||0;
+      return '<div class="inst'+(v?" on":"")+'" data-k="'+k+'"><span class="n">'+n+'</span><span class="step"><button type="button" data-dec="'+k+'" aria-label="One fewer '+esc(n)+'">−</button><output id="o-'+k+'">'+v+'</output><button type="button" data-inc="'+k+'" aria-label="One more '+esc(n)+'">+</button></span></div>';
+    }).join("")+'</div>'+
+    '<div class="lineup-sum" id="lineupSum"></div>'+
+    notesField()+navHtml();
+},
+5(){
+  return head(5,"What’s the piece?","A rough length is fine. If it’s more than one piece, add them all.")+
+    '<div id="pieces">'+S.pieces.map((p,i)=>pieceHtml(p,i)).join("")+'</div>'+
+    (S.pieces.length<5?'<button type="button" class="link-btn" id="addPiece">+ Add another piece</button>':'')+
+    '<div class="feedback" id="lenFb" style="margin-top:16px"></div>'+navHtml();
+},
+6(){
+  return head(6,"What have you got to work from?","Tick all that apply. You’ll send the files when you reply to the confirmation email.")+
+    optList(MATERIALS,S.materials,true,"mat")+navHtml();
+},
+7(){
+  return head(7,"Who owns the music?","Arranging someone else’s music needs the publisher’s permission, and getting it is your side of the deal.")+
+    optList(RIGHTS,S.rights,false,"rt")+navHtml();
+},
+8(){
+  const c=S.contact;
+  return head(8,"Where should the reply go?","It brings a fixed price and a delivery date.")+
+    '<div class="field"><label class="f" for="cGroup">Group</label><input type="text" id="cGroup" value="'+esc(c.group)+'" autocomplete="organization"></div>'+
+    '<div class="field"><label class="f" for="cName">Your name</label><input type="text" id="cName" value="'+esc(c.name)+'" autocomplete="name"></div>'+
+    '<div class="field"><label class="f" for="cEmail">Email</label><input type="email" id="cEmail" value="'+esc(c.email)+'" autocomplete="email"></div>'+
+    '<div class="field"><label class="f" for="cPhone">Phone (optional)</label><input type="tel" id="cPhone" value="'+esc(c.phone)+'" autocomplete="tel"></div>'+
+    navHtml(S.editing?"Back to the summary":"See your brief");
+},
+9(){
+  const est=estimate(), del=deliveryDate(), need=toDate(S.needBy);
+  const late = need && del>need;
+  const rows = [
+    ["What’s wrong", S.problems.map(k=>PROBLEMS.find(p=>p[0]===k)[1]).join("; ")+(S.problems.includes("other")?" ("+S.problemOther+")":""),1],
+    ["Dates", "Concert "+fmt(toDate(S.concert))+" · parts by "+fmt(need),2],
+    ["Group", GROUPS.find(g=>g[0]===S.group)[1],3],
+    ["Line-up", (S.group==="other"?S.lineupOther:lineupText())+(S.lineupNotes?" · "+S.lineupNotes:""),4],
+    ["Music", S.pieces.map(p=>p.title+(p.composer?" ("+p.composer+")":"")+", "+lenText(p)).join("; "),5],
+    ["Material", S.materials.map(k=>MATERIALS.find(m=>m[0]===k)[1]).join(", "),6],
+    ["Rights", RIGHTS.find(r=>r[0]===S.rights)[1],7],
+    ["Reply to", S.contact.name+", "+S.contact.group+" · "+S.contact.email+(S.contact.phone?" · "+S.contact.phone:""),8]
+  ];
+  return '<div class="fine-mark"><i></i>Fine</div>'+
+    '<div class="q-head"><h2>Your brief</h2></div>'+
+    '<p class="q-help">Check it over. Anything wrong, tap edit.</p>'+
+    '<div class="sheet">'+rows.map(([k,v,st])=>'<div class="r"><span class="k">'+k+'</span><span class="v">'+esc(v)+'</span><button type="button" class="link-btn" data-edit="'+st+'">edit</button></div>').join("")+'</div>'+
+    '<div class="quote">'+
+      '<div><div class="lab">Estimate</div>'+(est?'<div class="big">'+money(est.fee)+'</div><p>'+est.rt.label+', '+money(est.rt.r)+' a minute × '+fmtMin(est.billed)+(totalMinutes()<MIN_MINUTES?' (minimum '+MIN_MINUTES+' minutes)':'')+'</p>':'<div class="big word">Quoted by email</div><p>'+'Priced in the reply.'+'</p>')+'</div>'+
+      '<div><div class="lab">Parts delivered by</div><div class="big word">'+(late?fmt(need):fmt(del))+', 10am</div><p>'+(late?'Worked to your date. The exact time is confirmed in the reply.':'UK time, if everything\u2019s in today. '+(del<need?'Ahead of your date ('+fmt(need)+').':'Right on your date.'))+'</p></div>'+
+    '</div>'+
+    '<p class="terms">Launch rates. Score, parts and an audio preview, with two rounds of changes. The clock starts the day after the signed agreement, the 50% deposit and all your material are in. The fixed price is confirmed by email before you pay anything.</p>'+
+    '<div class="nav"><button class="go" id="send" type="button">Send this brief</button><button class="back-btn" id="prev" type="button">← Back</button></div>';
+},
+sent(){
+  return '<section class="stop"><span class="tag ok">Received</span><h2>Thanks, '+esc(S.contact.name.split(" ")[0]||"")+'. It\u2019s in hand.</h2>'+
+    '<p>You’ll get a reply at <b>'+esc(S.contact.email)+'</b> with a fixed price and a delivery date, usually within a few hours. Reply to that email with your score, parts or recording attached.</p>'+
+    '<p class="preview-note">Preview: nothing has been sent yet. On the live page this brief goes straight to '+EMAIL+'.</p>'+
+    '<div class="nav"><button class="go" id="again" type="button">Start a new brief</button></div></section>';
+},
+"stop-unsure"(){
+  return '<section class="stop"><span class="tag">Bar 7 · stop here</span><h2>Check first, then come back.</h2>'+
+    '<p>Arranging someone else’s music needs the publisher’s permission, and PRS and MCPS licences don’t cover it. The copyright line on your printed score names the publisher. If it’s unclear, the Music Publishers Association can point you the right way.</p>'+
+    '<p>Once you have a yes, this takes three minutes.</p>'+
+    '<div class="nav"><button class="go" id="change" type="button">Change my answer</button><button class="back-btn" id="again" type="button">Start again</button></div></section>';
+},
+"stop-licensed"(){
+  return '<section class="stop"><span class="tag">Bar 7 · stop here</span><h2>This one can\u2019t be touched.</h2>'+
+    '<p>Licensed shows from MTI, R&amp;H, Concord and others must be performed as written. Any change to the orchestration needs the licensor’s agreement, and some offer reduced versions of their own. Ask them first.</p>'+
+    '<div class="nav"><button class="go" id="change" type="button">Change my answer</button><button class="back-btn" id="again" type="button">Start again</button></div></section>';
+}
+};
+function moreItem(title, lead, body){
+  return '<details name="more"><summary><span class="more-h">'+title+'</span>'+(lead?'<span class="lead">'+lead+'</span>':'<span class="lead"></span>')+'<span class="pm" aria-hidden="true">+</span></summary><div class="body">'+body+'</div></details>';
+}
+function notesField(){ return '<div class="field"><label class="f" for="lineupNotes">Anything else worth knowing? (optional)</label><input type="text" id="lineupNotes" value="'+esc(S.lineupNotes)+'" placeholder="e.g. 2nd clarinet is a beginner; top C is the limit for trumpets"></div>'; }
+function pieceHtml(p,i){
+  return '<div class="piece"><div class="piece-top"><span>Piece '+(i+1)+'</span>'+(i>0?'<button type="button" class="link-btn" data-rm="'+i+'">Remove</button>':'')+'</div>'+
+    '<div class="field"><label class="f" for="pt-'+i+'">Title</label><input type="text" id="pt-'+i+'" data-p="'+i+'" data-f="title" value="'+esc(p.title)+'"></div>'+
+    '<div class="field"><label class="f" for="pc-'+i+'">Composer or arranger</label><input type="text" id="pc-'+i+'" data-p="'+i+'" data-f="composer" value="'+esc(p.composer)+'"></div>'+
+    '<label class="f">Length</label><div class="len"><input type="number" min="0" max="60" inputmode="numeric" id="pm-'+i+'" data-p="'+i+'" data-f="min" value="'+esc(p.min)+'" placeholder="min" aria-label="Minutes"><input type="number" min="0" max="59" step="5" inputmode="numeric" id="ps-'+i+'" data-p="'+i+'" data-f="sec" value="'+esc(p.sec)+'" placeholder="sec" aria-label="Seconds"></div></div>';
+}
+function lenText(p){ const m=parseInt(p.min)||0, s=parseInt(p.sec)||0; return m+":"+String(s).padStart(2,"0"); }
+function fmtMin(m){ const mm=Math.floor(m+1e-9), ss=Math.round((m-mm)*60); return ss? mm+" min "+ss+" s" : mm+" min"; }
+
+/* ---------- live feedback ---------- */
+function dateFeedback(){
+  const fb=$("#dateFb"); if(!fb) return;
+  const n=toDate(S.needBy);
+  if(!n){ fb.textContent=""; fb.className="feedback"; return; }
+  const days=daysBetween(today(),n);
+  if(days<0){ fb.textContent=""; return; }
+  fb.className="feedback";
+  fb.innerHTML = days<=1
+    ? "Parts by <b>"+fmt(n)+"</b>. Tight is what this is for. Keep going."
+    : "Parts by <b>"+fmt(n)+"</b>, concert "+(toDate(S.concert)?"on <b>"+fmt(toDate(S.concert))+"</b>":"to follow")+". Your date is the deadline.";
+}
+function lineupFeedback(){
+  const el=$("#lineupSum"); if(!el) return;
+  const t=lineupText(), n=playersCount();
+  el.textContent = n ? n+(n===1?" player: ":" players: ")+t : "Nobody yet. Use + to add players.";
+}
+function lengthFeedback(){
+  const fb=$("#lenFb"); if(!fb) return;
+  const m=totalMinutes();
+  if(!m){ fb.textContent=""; return; }
+  fb.innerHTML = "About <b>"+fmtMin(Math.round(m*12)/12)+"</b> of music in total.";
+}
+
+/* ---------- render ---------- */
+function render(){
+  drawStaff();
+  const html = screens[S.step]();
+  const el=document.createElement("div");
+  el.className="screen"+(dir<0?" back":"");
+  el.innerHTML=html;
+  stage.innerHTML=""; stage.appendChild(el);
+  $("#emailToggle").hidden = String(S.step).startsWith("stop");
+  if(String(S.step).startsWith("stop")) { $("#emailPanel").hidden=true; $("#emailToggle").setAttribute("aria-expanded","false"); }
+  bind(el);
+  if(S.step===2) dateFeedback();
+  if(S.step===4) lineupFeedback();
+  if(S.step===5) lengthFeedback();
+  const first = el.querySelector("h1,h2");
+  if(first && S.step!==0){ first.setAttribute("tabindex","-1"); first.focus({preventScroll:true}); }
+}
+
+function bind(el){
+  const on=(sel,ev,fn)=>el.querySelectorAll(sel).forEach(n=>n.addEventListener(ev,fn));
+  on("#start,#start2","click",()=>go(1));
+  // accordion: opening one section closes the others
+  el.querySelectorAll(".more details").forEach(d=>d.addEventListener("toggle",()=>{
+    if(d.open) el.querySelectorAll(".more details").forEach(o=>{ if(o!==d && o.open) o.open=false; });
+  }));
+  on("#next","click",next);
+  on("#prev","click",prev);
+  on("#again","click",()=>{ S=blank(); go(0,true); });
+  on("#change","click",()=>go(7,true));
+  on("#send","click",()=>go("sent"));
+  on("[data-edit]","click",e=>{ S.editing=true; go(+e.currentTarget.dataset.edit,true); });
+  on("[data-copy]","click",copyHandler);
+
+  on("[data-prob]","click",e=>{
+    const k=e.currentTarget.dataset.prob, i=S.problems.indexOf(k);
+    if(i>=0) S.problems.splice(i,1); else S.problems.push(k);
+    e.currentTarget.setAttribute("aria-pressed", String(i<0));
+    $("#otherWrap",el).hidden = !S.problems.includes("other");
+    setErr("");
+  });
+  on("#probOther","input",e=>S.problemOther=e.target.value);
+
+  ["concert","need"].forEach(id=>{
+    const key = id==="concert"?"concert":"needBy";
+    ["d","m","y"].forEach(p=>{
+      const s=el.querySelector("#"+id+"-"+p); if(!s) return;
+      s.addEventListener("change",()=>{ S[key][p]=s.value; dateFeedback(); setErr(""); });
+    });
+  });
+
+  on("[data-grp]","click",e=>{
+    const k=e.currentTarget.dataset.grp;
+    if(S.group!==k){ S.group=k; S.lineup={}; }
+    el.querySelectorAll("[data-grp]").forEach(b=>b.setAttribute("aria-checked", String(b.dataset.grp===k)));
+    setErr("");
+  });
+
+  on("[data-inc],[data-dec]","click",e=>{
+    const k=e.currentTarget.dataset.inc||e.currentTarget.dataset.dec;
+    const v=Math.max(0,Math.min(40,(S.lineup[k]||0)+(e.currentTarget.dataset.inc?1:-1)));
+    S.lineup[k]=v;
+    $("#o-"+k,el).textContent=v;
+    e.currentTarget.closest(".inst").classList.toggle("on",v>0);
+    lineupFeedback(); setErr("");
+  });
+  on("#lineupOther","input",e=>S.lineupOther=e.target.value);
+  on("#lineupNotes","input",e=>S.lineupNotes=e.target.value);
+
+  on("[data-p]","input",e=>{
+    const t=e.target; S.pieces[+t.dataset.p][t.dataset.f]=t.value; lengthFeedback();
+  });
+  on("#addPiece","click",()=>{ S.pieces.push({title:"",composer:"",min:"",sec:""}); render(); const i=S.pieces.length-1; const f=$("#pt-"+i); if(f) f.focus(); });
+  on("[data-rm]","click",e=>{ S.pieces.splice(+e.currentTarget.dataset.rm,1); render(); });
+
+  on("[data-mat]","click",e=>{
+    const k=e.currentTarget.dataset.mat, i=S.materials.indexOf(k);
+    if(i>=0) S.materials.splice(i,1); else S.materials.push(k);
+    e.currentTarget.setAttribute("aria-pressed", String(i<0)); setErr("");
+  });
+  on("[data-rt]","click",e=>{
+    const k=e.currentTarget.dataset.rt; S.rights=k;
+    el.querySelectorAll("[data-rt]").forEach(b=>b.setAttribute("aria-checked", String(b.dataset.rt===k))); setErr("");
+  });
+
+  const cmap={cGroup:"group",cName:"name",cEmail:"email",cPhone:"phone"};
+  Object.keys(cmap).forEach(id=>{ const f=el.querySelector("#"+id); if(f) f.addEventListener("input",()=>S.contact[cmap[id]]=f.value); });
+}
+
+/* ---------- global ---------- */
+function copyHandler(e){
+  const btn=e.currentTarget, text=btn.dataset.copy;
+  const done=()=>{ const o=btn.textContent; btn.textContent="Copied"; setTimeout(()=>btn.textContent=o,1400); };
+  const fallback=()=>{ const r=document.createRange(); const n=btn.previousElementSibling; if(n){ r.selectNodeContents(n); const s=getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent="Selected"; setTimeout(()=>btn.textContent="Copy",1400);} };
+  try{ navigator.clipboard.writeText(text).then(done,fallback); }catch(err){ fallback(); }
+}
+document.querySelectorAll("#emailPanel [data-copy]").forEach(b=>b.addEventListener("click",copyHandler));
+$("#emailToggle").addEventListener("click",()=>{
+  const p=$("#emailPanel"); p.hidden=!p.hidden; $("#emailToggle").setAttribute("aria-expanded",String(!p.hidden));
+});
+$("#brand").addEventListener("click",()=>go(0,true));
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter" || e.shiftKey) return;
+  const t=e.target;
+  if(t && (t.tagName==="TEXTAREA" || t.tagName==="BUTTON" || t.tagName==="A" || t.tagName==="SELECT")) return;
+  if(typeof S.step==="number" && S.step>=1 && S.step<=8){ e.preventDefault(); next(); }
+});
+
+let rz; window.addEventListener("resize",()=>{ clearTimeout(rz); rz=setTimeout(drawStaff,120); });
+render();
+})();
+</script>
