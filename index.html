@@ -86,7 +86,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-siz
 .hero{padding-block:22px 10px}
 .hero h1{font-family:var(--f-display);font-variation-settings:"wdth" 64;font-weight:900;text-transform:uppercase;line-height:.88;letter-spacing:-.005em;font-size:clamp(3.4rem,13vw,6.6rem);margin:0 0 22px;text-wrap:balance}
 .hl{position:relative;display:inline-block;z-index:0;color:var(--hi-ink)}
-.hl::before{content:"";position:absolute;z-index:-1;left:-.06em;right:-.06em;top:.18em;bottom:.04em;background:var(--hi);transform-origin:left center;transform:skewX(-6deg);animation:swipe .7s .25s cubic-bezier(.3,.8,.3,1) both}
+.hl::before{content:"";position:absolute;z-index:-1;left:-.06em;right:-.06em;top:.02em;bottom:.04em;background:var(--hi);transform-origin:left center;transform:skewX(-6deg);animation:swipe .7s .25s cubic-bezier(.3,.8,.3,1) both}
 @keyframes swipe{from{transform:skewX(-6deg) scaleX(0)}to{transform:skewX(-6deg) scaleX(1)}}
 .lede{font-size:1.25rem;line-height:1.45;max-width:var(--measure);margin:0 0 10px}
 .sub{color:var(--ink-2);max-width:var(--measure);margin:0 0 26px}
@@ -270,6 +270,12 @@ footer{margin-top:56px;padding-top:14px;border-top:1px solid var(--rule);font-si
 @media (max-width:559px){.wall-row{height:3.4rem}.wall-row::before{height:41px;background:repeating-linear-gradient(to bottom,var(--wall) 0 1px,transparent 1px 10px)}.wall-track span{font-size:2.5rem}.wall-track .wclef{width:31px;height:92px}}
 .stage{overflow:visible}
 html,body{overflow-x:clip}
+/* ---------- desktop landing: same column, scaled up by script to fill the window top to bottom ---------- */
+@media (min-width:900px){
+  body.is-landing .wrap{display:flex;flex-direction:column}
+  body.is-landing .stage,body.is-landing .screen{flex:1;display:flex;flex-direction:column}
+  body.is-landing .hero{flex:1;display:flex;flex-direction:column;justify-content:space-evenly}
+}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
 
@@ -814,6 +820,7 @@ function lengthFeedback(){
 /* ---------- render ---------- */
 function render(){
   drawStaff();
+  document.body.classList.toggle("is-landing", S.step===0);
   const html = screens[S.step]();
   const el=document.createElement("div");
   el.className="screen"+(dir<0?" back":"");
@@ -827,7 +834,23 @@ function render(){
   if(S.step===5) lengthFeedback();
   const first = el.querySelector("h1,h2");
   if(first && S.step!==0){ first.setAttribute("tabindex","-1"); first.focus({preventScroll:true}); }
+  fitLanding();
 }
+
+/* desktop landing: keep the single column, scale it up so it fills the window top to bottom */
+function fitLanding(){
+  const w=document.querySelector(".wrap");
+  w.style.zoom=""; w.style.minHeight="";
+  if(!document.body.classList.contains("is-landing") || innerWidth<900) return;
+  let h=w.getBoundingClientRect().height;
+  w.querySelectorAll(".more details[open] .body").forEach(b=>{ h-=b.getBoundingClientRect().height; });
+  const zH=innerHeight/h, zW=(innerWidth*0.9)/w.getBoundingClientRect().width;
+  const z=Math.max(1,Math.min(zH,zW,1.8));
+  w.style.zoom=z.toFixed(3);
+  w.style.minHeight=(innerHeight/z)+"px";
+}
+addEventListener("resize",fitLanding);
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitLanding);
 
 function bind(el){
   const on=(sel,ev,fn)=>el.querySelectorAll(sel).forEach(n=>n.addEventListener(ev,fn));
