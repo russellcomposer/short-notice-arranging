@@ -11,7 +11,8 @@ Single-page site for short-notice re-scoring and arranging for bands and orchest
 | Constant | Meaning | Value |
 |---|---|---|
 | `MIN_MINUTES` | minimum billed minutes per job | 3 |
-| `MIN_PER_DAY` | promised minutes of finished music per working day | 5 |
+| `MIN_PER_DAY` | promised minutes of finished music per working day (start day counts as day 1) | 3 |
+| `CUTOFF_HOUR` | all three in before this UK hour = start that day, otherwise next day | 14 |
 | `NEW_ARR` | multiplier for new arrangements (melody, lead sheet, recording, piano score) | 1.5 |
 | `MIN_FEE` | minimum fee per job in £ (0 = off) | 0 |
 | `R` | per-minute rates | see script |

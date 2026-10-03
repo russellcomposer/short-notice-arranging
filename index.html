@@ -304,7 +304,8 @@ const EMAIL = "russell.music.uk@gmail.com";
 const MIN_FEE = 0;            // per-job minimum charge in £; 0 = off
 const MIN_MINUTES = 3;
 const NEW_ARR = 1.5;         // new arrangement / orchestration = rescue rate x 1.5
-const MIN_PER_DAY = 5;      // minutes of finished music promised per working day
+const MIN_PER_DAY = 3;      // minutes of finished music promised per working day
+const CUTOFF_HOUR = 14;     // everything in before this hour (UK time) = work starts that day; after it = the next day
 
 /* ---------- data ---------- */
 const PROBLEMS = [
@@ -364,7 +365,15 @@ const stage = $("#stage");
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 /* ---------- dates ---------- */
-function today(){ const t=new Date(); return new Date(t.getFullYear(),t.getMonth(),t.getDate()); }
+/* dates and the 2pm cut-off follow UK time, wherever the client is */
+function ukNow(){
+  try{
+    const p={}; new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",year:"numeric",month:"numeric",day:"numeric",hour:"numeric",hourCycle:"h23"}).formatToParts(new Date()).forEach(x=>{p[x.type]=x.value;});
+    return {y:+p.year,m:+p.month,d:+p.day,h:+p.hour};
+  }catch(e){ const t=new Date(); return {y:t.getFullYear(),m:t.getMonth()+1,d:t.getDate(),h:t.getHours()}; }
+}
+function today(){ const u=ukNow(); return new Date(u.y,u.m-1,u.d); }
+function beforeCutoff(){ return ukNow().h < CUTOFF_HOUR; }
 function toDate(o){ if(!o.d||!o.m||!o.y) return null; const d=new Date(+o.y,+o.m-1,+o.d); return d.getMonth()===+o.m-1 ? d : null; }
 function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
 function daysBetween(a,b){ return Math.round((b-a)/86400000); }
@@ -444,7 +453,9 @@ function workDays(){
   }
   return d;
 }
-function deliveryDate(){ return addDays(today(), workDays()+1); }
+/* start day counts as day 1; parts arrive at 10am the day after the last working day */
+function startDate(){ return beforeCutoff() ? today() : addDays(today(),1); }
+function deliveryDate(){ return addDays(startDate(), workDays()); }
 function money(n){ return "£"+n.toLocaleString("en-GB",{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2}); }
 function lineupText(){
   const list = INSTR[S.group]||[];
@@ -621,12 +632,12 @@ const screens = {
     '</div>'+
     '<div class="hero-side">'+
     '<div class="facts">'+
-      '<div><b>Send it today</b><span>Up to '+MIN_PER_DAY+' minutes of music: parts by '+LONGDAYS[addDays(today(),2).getDay()]+', 10am UK time.</span></div>'+
+      '<div><b>In by 2pm, parts next morning</b><span>Up to '+MIN_PER_DAY+' minutes of music, with everything in by 2pm UK time: parts by 10am the next day.</span></div>'+
       '<div><b>From £49 a minute</b><span>Launch rates. Score, parts and an audio preview included.</span></div>'+
       '<div><b>Permission first</b><span>Originals, public-domain works, or music you’ve cleared with the publisher.</span></div>'+
     '</div>'+
     '<div class="more">'+
-      moreItem("What gets fixed","Parts by Thursday",
+      moreItem("What gets fixed","Parts by the next morning",
         '<ul class="fixes">'+
         '<li><b>A player drops out.</b>Their lines go to the people you have, so nothing important disappears.</li>'+
         '<li><b>The band is smaller than the music.</b>Reduced to the players on the night, part by part.</li>'+
@@ -650,7 +661,7 @@ const screens = {
         '<ol class="steps">'+
         '<li><span>Answer eight short questions. It takes about three minutes.</span></li>'+
         '<li><span>A reply follows with a fixed price and a delivery time, usually within a few hours.</span></li>'+
-        '<li><span>Sign, pay a 50% deposit and send your material. Work starts the next day, weekends included, and the parts arrive by 10am UK time.</span></li>'+
+        '<li><span>Sign, pay a 50% deposit and send your material. With all three in by 2pm UK time, work starts that day; after 2pm, the next day. Weekends included, and the parts arrive by 10am UK time.</span></li>'+
         '</ol>'+
         '<p style="margin-top:14px">You get a transposed score, a concert-pitch score, every part, and an audio preview, with two rounds of changes.</p>')+
       moreItem("Who writes the parts","Composer & orchestrator",
@@ -728,9 +739,9 @@ const screens = {
     '<div class="sheet">'+rows.map(([k,v,st])=>'<div class="r"><span class="k">'+k+'</span><span class="v">'+esc(v)+'</span><button type="button" class="link-btn" data-edit="'+st+'">edit</button></div>').join("")+'</div>'+
     '<div class="quote">'+
       '<div><div class="lab">Estimate</div>'+(est?'<div class="big">'+money(est.fee)+'</div><p>'+est.rt.label+', '+money(est.rt.r)+' a minute × '+fmtMin(est.billed)+(totalMinutes()<MIN_MINUTES?' (minimum '+MIN_MINUTES+' minutes)':'')+'</p>':'<div class="big word">Quoted by email</div><p>'+'Priced in the reply.'+'</p>')+'</div>'+
-      '<div><div class="lab">Parts delivered by</div><div class="big word">'+(late?fmt(need):fmt(del))+', 10am</div><p>'+(late?'Worked to your date. The exact time is confirmed in the reply.':'UK time, if everything\u2019s in today. '+(del<need?'Ahead of your date ('+fmt(need)+').':'Right on your date.'))+'</p></div>'+
+      '<div><div class="lab">Parts delivered by</div><div class="big word">'+(late?fmt(need):fmt(del))+', 10am</div><p>'+(late?'Worked to your date. The exact time is confirmed in the reply.':'UK time, if everything\u2019s in by 2pm '+(beforeCutoff()?'today':'tomorrow')+'. '+(del<need?'Ahead of your date ('+fmt(need)+').':'Right on your date.'))+'</p></div>'+
     '</div>'+
-    '<p class="terms">Launch rates. Score, parts and an audio preview, with two rounds of changes. The clock starts the day after the signed agreement, the 50% deposit and all your material are in. The fixed price is confirmed by email before you pay anything.</p>'+
+    '<p class="terms">Launch rates. Score, parts and an audio preview, with two rounds of changes. The clock starts once the signed agreement, the 50% deposit and all your material are in and confirmed: the same day if that’s before 2pm UK time, otherwise the next day. The fixed price is confirmed by email before you pay anything.</p>'+
     '<p class="send-err" id="sendErr" role="alert" hidden>That didn\u2019t go through. Try again, or email <a href="mailto:'+EMAIL+'">'+EMAIL+'</a>.</p>'+
     '<div class="nav"><button class="go" id="send" type="button">Send this brief</button><button class="back-btn" id="prev" type="button">← Back</button></div>';
 },
