@@ -151,6 +151,9 @@ textarea{min-height:5.5rem;resize:vertical}
 .nav{display:flex;align-items:center;gap:14px;margin-top:26px;flex-wrap:wrap}
 .go{font-family:var(--f-display);font-variation-settings:"wdth" 85;font-weight:800;text-transform:uppercase;letter-spacing:.04em;font-size:1rem;background:var(--ink);color:var(--paper);border:0;padding:14px 22px;border-radius:3px;cursor:pointer}
 .go:hover{background:var(--ink);box-shadow:4px 4px 0 var(--hi)}
+.send-err{color:var(--warn);font-size:.95rem;margin:0 0 12px}
+.send-err a{color:inherit}
+.go[disabled]{opacity:.6;cursor:progress}
 .go:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
 .back-btn{background:none;border:0;font:inherit;color:var(--ink-2);cursor:pointer;padding:6px 0}
 .back-btn:hover{color:var(--ink)}
@@ -552,6 +555,48 @@ function dateHtml(id, o){
 }
 
 /* ---------- screens ---------- */
+function briefRows(){
+  return [
+    ["What’s wrong", S.problems.map(k=>PROBLEMS.find(p=>p[0]===k)[1]).join("; ")+(S.problems.includes("other")?" ("+S.problemOther+")":""),1],
+    ["Dates", "Concert "+fmt(toDate(S.concert))+" · parts by "+fmt(toDate(S.needBy)),2],
+    ["Group", GROUPS.find(g=>g[0]===S.group)[1],3],
+    ["Line-up", (S.group==="other"?S.lineupOther:lineupText())+(S.lineupNotes?" · "+S.lineupNotes:""),4],
+    ["Music", S.pieces.map(p=>p.title+(p.composer?" ("+p.composer+")":"")+", "+lenText(p)).join("; "),5],
+    ["Material", S.materials.map(k=>MATERIALS.find(m=>m[0]===k)[1]).join(", "),6],
+    ["Rights", RIGHTS.find(r=>r[0]===S.rights)[1],7],
+    ["Reply to", S.contact.name+", "+S.contact.group+" · "+S.contact.email+(S.contact.phone?" · "+S.contact.phone:""),8]
+  ];
+}
+const WEB3FORMS_KEY = "6e39fdc5-5281-4782-b548-e938674d9014";
+async function sendBrief(btn){
+  if(btn.disabled) return;
+  const est=estimate(), del=deliveryDate(), need=toDate(S.needBy), late=need&&del>need;
+  const data = {
+    access_key: WEB3FORMS_KEY,
+    subject: "Brief: "+(S.contact.group||S.contact.name||"new enquiry")+" · concert "+fmt(toDate(S.concert)),
+    from_name: "Short Notice Arranging",
+    replyto: S.contact.email,
+    name: S.contact.name,
+    email: S.contact.email,
+    botcheck: ""
+  };
+  briefRows().forEach(([k,v])=>{ data[k]=v; });
+  data["Estimate"] = est ? money(est.fee)+" ("+est.rt.label+", "+money(est.rt.r)+"/min × "+fmtMin(est.billed)+")" : "Quote by email";
+  data["Parts delivered by"] = (late?fmt(need)+", 10am (client's date, earlier than standard turnaround: confirm)":fmt(del)+", 10am UK time");
+  const label=btn.textContent; btn.disabled=true; btn.textContent="Sending…";
+  const err=document.getElementById("sendErr"); if(err) err.hidden=true;
+  try{
+    const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),15000);
+    const res=await fetch("https://api.web3forms.com/submit",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(data),signal:ctl.signal});
+    clearTimeout(t);
+    const j=await res.json().catch(()=>({}));
+    if(!res.ok||!j.success) throw new Error(j.message||("HTTP "+res.status));
+    go("sent");
+  }catch(e){
+    btn.disabled=false; btn.textContent=label;
+    if(err) err.hidden=false;
+  }
+}
 const screens = {
 0(){
   return '<section class="hero">'+
@@ -666,16 +711,7 @@ const screens = {
 9(){
   const est=estimate(), del=deliveryDate(), need=toDate(S.needBy);
   const late = need && del>need;
-  const rows = [
-    ["What’s wrong", S.problems.map(k=>PROBLEMS.find(p=>p[0]===k)[1]).join("; ")+(S.problems.includes("other")?" ("+S.problemOther+")":""),1],
-    ["Dates", "Concert "+fmt(toDate(S.concert))+" · parts by "+fmt(need),2],
-    ["Group", GROUPS.find(g=>g[0]===S.group)[1],3],
-    ["Line-up", (S.group==="other"?S.lineupOther:lineupText())+(S.lineupNotes?" · "+S.lineupNotes:""),4],
-    ["Music", S.pieces.map(p=>p.title+(p.composer?" ("+p.composer+")":"")+", "+lenText(p)).join("; "),5],
-    ["Material", S.materials.map(k=>MATERIALS.find(m=>m[0]===k)[1]).join(", "),6],
-    ["Rights", RIGHTS.find(r=>r[0]===S.rights)[1],7],
-    ["Reply to", S.contact.name+", "+S.contact.group+" · "+S.contact.email+(S.contact.phone?" · "+S.contact.phone:""),8]
-  ];
+  const rows = briefRows();
   return '<div class="fine-mark"><i></i>Fine</div>'+
     '<div class="q-head"><h2>Your brief</h2></div>'+
     '<p class="q-help">Check it over. Anything wrong, tap edit.</p>'+
@@ -685,12 +721,12 @@ const screens = {
       '<div><div class="lab">Parts delivered by</div><div class="big word">'+(late?fmt(need):fmt(del))+', 10am</div><p>'+(late?'Worked to your date. The exact time is confirmed in the reply.':'UK time, if everything\u2019s in today. '+(del<need?'Ahead of your date ('+fmt(need)+').':'Right on your date.'))+'</p></div>'+
     '</div>'+
     '<p class="terms">Launch rates. Score, parts and an audio preview, with two rounds of changes. The clock starts the day after the signed agreement, the 50% deposit and all your material are in. The fixed price is confirmed by email before you pay anything.</p>'+
+    '<p class="send-err" id="sendErr" role="alert" hidden>That didn\u2019t go through. Try again, or email <a href="mailto:'+EMAIL+'">'+EMAIL+'</a>.</p>'+
     '<div class="nav"><button class="go" id="send" type="button">Send this brief</button><button class="back-btn" id="prev" type="button">← Back</button></div>';
 },
 sent(){
   return '<section class="stop"><span class="tag ok">Received</span><h2>Thanks, '+esc(S.contact.name.split(" ")[0]||"")+'. It\u2019s in hand.</h2>'+
     '<p>You’ll get a reply at <b>'+esc(S.contact.email)+'</b> with a fixed price and a delivery date, usually within a few hours. Reply to that email with your score, parts or recording attached.</p>'+
-    '<p class="preview-note">Preview: nothing has been sent yet. On the live page this brief goes straight to '+EMAIL+'.</p>'+
     '<div class="nav"><button class="go" id="again" type="button">Start a new brief</button></div></section>';
 },
 "stop-unsure"(){
@@ -783,7 +819,7 @@ function bind(el){
   on("#prev","click",prev);
   on("#again","click",()=>{ S=blank(); go(0,true); });
   on("#change","click",()=>go(7,true));
-  on("#send","click",()=>go("sent"));
+  on("#send","click",e=>sendBrief(e.currentTarget));
   on("[data-edit]","click",e=>{ S.editing=true; go(+e.currentTarget.dataset.edit,true); });
   on("[data-copy]","click",copyHandler);
 
