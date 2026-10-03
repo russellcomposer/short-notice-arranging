@@ -315,7 +315,7 @@ const PROBLEMS = [
   ["other","Something else",""]
 ];
 const GROUPS = [
-  ["wind","Concert or wind band"],["brass","Brass band"],["orch","Orchestra"],["strings","String orchestra"],["choir","Choir with band or orchestra","The choir stays as it is; the accompaniment is written for your players."],
+  ["wind","Concert or wind band"],["brass","Brass band"],["orch","Orchestra"],["wwstr","Strings with woodwind"],["strings","String orchestra"],["choir","Choir with band or orchestra","The choir stays as it is; the accompaniment is written for your players."],
   ["chamber","Small ensemble"],["other","Something else"]
 ];
 const ORCH = [["fl","Flute"],["ob","Oboe"],["cl","Clarinet"],["bsn","Bassoon"],["hn","Horn"],["tpt","Trumpet"],["tbn","Trombone"],["tba","Tuba"],["timp","Timpani"],["perc","Percussion"],["hp","Harp"],["pno","Piano"],["vn1","Violin I"],["vn2","Violin II"],["va","Viola"],["vc","Cello"],["db","Double bass"]];
@@ -323,6 +323,7 @@ const INSTR = {
   wind:[["picc","Piccolo"],["fl","Flute"],["ob","Oboe"],["bsn","Bassoon"],["ebcl","Eb clarinet"],["cl1","1st clarinet"],["cl2","2nd clarinet"],["cl3","3rd clarinet"],["bcl","Bass clarinet"],["asx1","1st alto sax"],["asx2","2nd alto sax"],["tsx","Tenor sax"],["bsx","Baritone sax"],["tpt1","1st trumpet / cornet"],["tpt2","2nd trumpet / cornet"],["tpt3","3rd trumpet / cornet"],["hn1","1st horn in F"],["hn2","2nd horn in F"],["hn3","3rd horn in F"],["hn4","4th horn in F"],["tbn1","1st trombone"],["tbn2","2nd trombone"],["btbn","Bass trombone"],["euph","Euphonium"],["tba","Tuba"],["sb","String bass"],["timp","Timpani"],["perc","Percussion"],["kbd","Piano / keys"]],
   brass:[["sop","Soprano cornet"],["solo","Solo cornet"],["rep","Repiano cornet"],["cnt2","2nd cornet"],["cnt3","3rd cornet"],["flug","Flugelhorn"],["shn","Solo horn"],["thn1","1st horn"],["thn2","2nd horn"],["bar1","1st baritone"],["bar2","2nd baritone"],["tbn1","1st trombone"],["tbn2","2nd trombone"],["btbn","Bass trombone"],["euph","Euphonium"],["ebb","Eb bass"],["bbb","Bb bass"],["perc","Percussion"]],
   orch:ORCH,
+  wwstr:ORCH,
   choir:ORCH,
   strings:[["vn1","Violin I"],["vn2","Violin II"],["va","Viola"],["vc","Cello"],["db","Double bass"],["pno","Piano"]],
   chamber:ORCH
@@ -382,6 +383,13 @@ const R = {quartet:49, perExtra:0.15, piano:0.20, band:74.40, fullOrch:90, wwStr
 function withPiano(r, label, piano){
   return piano ? {r:Math.round(r*(1+R.piano)*100)/100, label:label+" with piano"} : {r, label};
 }
+const STR={vn1:8,vn2:6,va:5,vc:4,db:2};
+const DEFAULTS = {
+  wind:{picc:1,fl:2,ob:1,bsn:1,cl1:3,cl2:3,cl3:2,bcl:1,asx1:1,asx2:1,tsx:1,bsx:1,tpt1:2,tpt2:2,tpt3:1,hn1:1,hn2:1,hn3:1,hn4:1,tbn1:1,tbn2:1,btbn:1,euph:1,tba:2,timp:1,perc:2},
+  orch:Object.assign({fl:2,ob:2,cl:2,bsn:2,hn:4,tpt:2,tbn:3,tba:1,timp:1,perc:2},STR),
+  wwstr:Object.assign({fl:2,ob:2,cl:2,bsn:2,hn:2},STR),
+  strings:Object.assign({},STR)
+};
 function orchRate(){
   const L=S.lineup, has=k=>(L[k]||0)>0;
   if (has("tpt")||has("tbn")||has("tba")) return withPiano(R.fullOrch,"Full orchestra",has("pno"));
@@ -403,7 +411,7 @@ function rate(){
     case "wind": return withPiano(R.band,"Wind band",has("kbd"));
     case "brass": return {r:R.band,label:"Brass band"};
     case "strings": return withPiano(R.quartet,"String orchestra",has("pno"));
-    case "orch": return orchRate();
+    case "orch": case "wwstr": return orchRate();
     case "chamber": return chamberRate();
     case "choir": {
       // accompaniment for a choir: whichever is lower of the per-instrument and the orchestral rate
@@ -678,7 +686,7 @@ const screens = {
       notesField()+navHtml();
   }
   const list=INSTR[S.group]||[];
-  return head(4,"Who’s actually turning up?","Count the players you’ll have on the night, not the ones on the original parts.")+
+  return head(4,"Who’s actually turning up?",DEFAULTS[S.group]?"A standard line-up is filled in. Change it to the players you’ll actually have.":"Count the players you’ll have on the night, not the ones on the original parts.")+
     '<div class="lineup">'+list.map(([k,n])=>{
       const v=S.lineup[k]||0;
       return '<div class="inst'+(v?" on":"")+'" data-k="'+k+'"><span class="n">'+n+'</span><span class="step"><button type="button" data-dec="'+k+'" aria-label="One fewer '+esc(n)+'">−</button><output id="o-'+k+'">'+v+'</output><button type="button" data-inc="'+k+'" aria-label="One more '+esc(n)+'">+</button></span></div>';
@@ -843,7 +851,7 @@ function bind(el){
 
   on("[data-grp]","click",e=>{
     const k=e.currentTarget.dataset.grp;
-    if(S.group!==k){ S.group=k; S.lineup={}; }
+    if(S.group!==k){ S.group=k; S.lineup=Object.assign({},DEFAULTS[k]||{}); }
     el.querySelectorAll("[data-grp]").forEach(b=>b.setAttribute("aria-checked", String(b.dataset.grp===k)));
     setErr("");
   });
