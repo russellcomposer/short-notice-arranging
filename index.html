@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Short Notice Arranging</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -578,7 +580,7 @@ async function sendBrief(btn){
     email: S.contact.email,
     botcheck: ""
   };
-  briefRows().forEach(([k,v])=>{ data[k]=v; });
+  briefRows().forEach(([k,v])=>{ data[k.replace(/\u2019/g,"'")]=v; });
   data["Estimate"] = est ? money(est.fee)+" ("+est.rt.label+", "+money(est.rt.r)+"/min × "+fmtMin(est.billed)+")" : "Quote by email";
   data["Parts delivered by"] = (late?fmt(need)+", 10am (client's date, earlier than standard turnaround: confirm)":fmt(del)+", 10am UK time");
   const label=btn.textContent; btn.disabled=true; btn.textContent="Sending…";
