@@ -315,7 +315,7 @@ const PROBLEMS = [
   ["other","Something else",""]
 ];
 const GROUPS = [
-  ["wind","Concert or wind band"],["brass","Brass band"],["orch","Orchestra"],["wwstr","Strings with woodwind"],["strings","String orchestra"],["choir","Choir with band or orchestra","The choir stays as it is; the accompaniment is written for your players."],
+  ["wind","Concert or wind band"],["brass","Brass band"],["orch","Orchestra"],["wwstr","Chamber orchestra","Strings, woodwind and horns. Adding trumpets or trombones makes it a full orchestra."],["strings","String orchestra"],["choir","Choir with band or orchestra","The choir stays as it is; the accompaniment is written for your players."],
   ["chamber","Small ensemble"],["other","Something else"]
 ];
 const ORCH = [["fl","Flute"],["ob","Oboe"],["cl","Clarinet"],["bsn","Bassoon"],["hn","Horn"],["tpt","Trumpet"],["tbn","Trombone"],["tba","Tuba"],["timp","Timpani"],["perc","Percussion"],["hp","Harp"],["pno","Piano"],["vn1","Violin I"],["vn2","Violin II"],["va","Viola"],["vc","Cello"],["db","Double bass"]];
@@ -388,7 +388,8 @@ const DEFAULTS = {
   wind:{picc:1,fl:2,ob:1,bsn:1,cl1:3,cl2:3,cl3:2,bcl:1,asx1:1,asx2:1,tsx:1,bsx:1,tpt1:2,tpt2:2,tpt3:1,hn1:1,hn2:1,hn3:1,hn4:1,tbn1:1,tbn2:1,btbn:1,euph:1,tba:2,timp:1,perc:2},
   orch:Object.assign({fl:2,ob:2,cl:2,bsn:2,hn:4,tpt:2,tbn:3,tba:1,timp:1,perc:2},STR),
   wwstr:Object.assign({fl:2,ob:2,cl:2,bsn:2,hn:2},STR),
-  strings:Object.assign({},STR)
+  strings:Object.assign({},STR),
+  brass:{sop:1,solo:4,rep:1,cnt2:2,cnt3:2,flug:1,shn:1,thn1:1,thn2:1,bar1:1,bar2:1,tbn1:1,tbn2:1,btbn:1,euph:2,ebb:2,bbb:2,perc:2}
 };
 function orchRate(){
   const L=S.lineup, has=k=>(L[k]||0)>0;
@@ -396,7 +397,7 @@ function orchRate(){
   const base={fl:2,ob:2,cl:2,bsn:2,hn:2,perc:2,timp:2};
   let extra = has("hp") ? 1 : 0;
   for(const k in base){ if((L[k]||0)>base[k]) extra++; }
-  return withPiano(R.wwStrings+R.wwExtra*extra,"Woodwind and string orchestra",has("pno"));
+  return withPiano(R.wwStrings+R.wwExtra*extra,"Chamber orchestra",has("pno"));
 }
 function chamberRate(){
   const L=S.lineup, has=k=>(L[k]||0)>0, pianoKey="pno";
@@ -638,7 +639,7 @@ const screens = {
         '<tr><td>String quartet, or any four instruments</td><td>£49</td></tr>'+
         '<tr class="sub"><td>Each extra instrument</td><td>+£7.35</td></tr>'+
         '<tr><td>String orchestra</td><td>£49</td></tr>'+
-        '<tr><td>Woodwind and string orchestra</td><td>£70.20</td></tr>'+
+        '<tr><td>Chamber orchestra: strings, woodwind and horns</td><td>£70.20</td></tr>'+
         '<tr><td>Wind band or brass band</td><td>£74.40</td></tr>'+
         '<tr><td>Full orchestra</td><td>£90</td></tr>'+
         '<tr class="sub"><td>Piano in any line-up</td><td>+20%</td></tr>'+
