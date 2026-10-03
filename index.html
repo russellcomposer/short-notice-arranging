@@ -747,7 +747,7 @@ const screens = {
       '<div><div class="lab">Estimate</div>'+(est?'<div class="big">'+money(est.fee)+'</div><p>'+est.rt.label+', '+money(est.rt.r)+' a minute × '+fmtMin(est.billed)+(totalMinutes()<MIN_MINUTES?' (minimum '+MIN_MINUTES+' minutes)':'')+'</p>':'<div class="big word">Quoted by email</div><p>'+'Priced in the reply.'+'</p>')+'</div>'+
       '<div><div class="lab">Parts delivered by</div><div class="big word">'+(late?fmt(need):fmt(del))+', 10am</div><p>'+(late?'Worked to your date. The exact time is confirmed in the reply.':'UK time, if everything\u2019s in by 2pm '+(beforeCutoff()?'today':'tomorrow')+'. '+(del<need?'Ahead of your date ('+fmt(need)+').':'Right on your date.'))+'</p></div>'+
     '</div>'+
-    '<p class="terms">Launch rates. Score, parts and an audio preview, with two rounds of changes. The clock starts once the signed agreement, the 50% deposit and all your material are in and confirmed: the same day if that’s before 2pm UK time, otherwise the next day. The fixed price is confirmed by email before you pay anything.</p>'+
+    '<p class="terms">Launch rates. Score, parts and an audio preview, with two rounds of changes. The clock starts once the signed agreement, the 50% deposit and all your material are in and confirmed: the same day if that’s before 2pm UK time, otherwise the next day. Dates follow today’s queue: the fixed price and your delivery date are confirmed by email before you pay anything.</p>'+
     '<p class="send-err" id="sendErr" role="alert" hidden>That didn\u2019t go through. Try again, or email <a href="mailto:'+EMAIL+'">'+EMAIL+'</a>.</p>'+
     '<div class="nav"><button class="go" id="send" type="button">Send this brief</button><button class="back-btn" id="prev" type="button">← Back</button></div>';
 },
@@ -840,13 +840,15 @@ function render(){
 /* desktop landing: keep the single column, scale it up so it fills the window top to bottom */
 function fitLanding(){
   const w=document.querySelector(".wrap");
-  w.style.zoom=""; w.style.minHeight="";
+  w.style.transform=""; w.style.minHeight="";
   if(!document.body.classList.contains("is-landing") || innerWidth<900) return;
   let h=w.getBoundingClientRect().height;
   w.querySelectorAll(".more details[open] .body").forEach(b=>{ h-=b.getBoundingClientRect().height; });
   const zH=innerHeight/h, zW=(innerWidth*0.9)/w.getBoundingClientRect().width;
   const z=Math.max(1,Math.min(zH,zW,1.8));
-  w.style.zoom=z.toFixed(3);
+  /* scale() keeps the exact unscaled line breaks in every browser (Safari's zoom re-wraps text) */
+  w.style.transformOrigin="top center";
+  w.style.transform="scale("+z.toFixed(4)+")";
   w.style.minHeight=(innerHeight/z)+"px";
 }
 addEventListener("resize",fitLanding);
