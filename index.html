@@ -345,7 +345,7 @@ const LONGDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","S
 const blank = () => ({
   step:0, editing:false,
   problems:[], problemOther:"",
-  concert:{d:"",m:"",y:""}, needBy:{d:"",m:"",y:""},
+  needBy:{d:"",m:"",y:""},
   group:"", lineup:{}, lineupOther:"", lineupNotes:"",
   pieces:[{title:"",composer:"",min:"",sec:""}],
   materials:[], rights:"",
@@ -503,11 +503,9 @@ function validate(){
     if(S.problems.includes("other") && !S.problemOther.trim()) return setErr("Say briefly what's gone wrong.");
   }
   if(s===2){
-    const c=toDate(S.concert), n=toDate(S.needBy);
-    if(!c) return setErr("Add the concert date.");
+    const n=toDate(S.needBy);
     if(!n) return setErr("Add the date you need the parts by.");
     if(n<today()) return setErr("That date has already passed.");
-    if(n>c) return setErr("The parts are needed after the concert. Check the two dates.");
   }
   if(s===3 && !S.group) return setErr("Choose the kind of group.");
   if(s===4){
@@ -558,7 +556,7 @@ function dateHtml(id, o){
 function briefRows(){
   return [
     ["What’s wrong", S.problems.map(k=>PROBLEMS.find(p=>p[0]===k)[1]).join("; ")+(S.problems.includes("other")?" ("+S.problemOther+")":""),1],
-    ["Dates", "Concert "+fmt(toDate(S.concert))+" · parts by "+fmt(toDate(S.needBy)),2],
+    ["Parts needed by", fmt(toDate(S.needBy)),2],
     ["Group", GROUPS.find(g=>g[0]===S.group)[1],3],
     ["Line-up", (S.group==="other"?S.lineupOther:lineupText())+(S.lineupNotes?" · "+S.lineupNotes:""),4],
     ["Music", S.pieces.map(p=>p.title+(p.composer?" ("+p.composer+")":"")+", "+lenText(p)).join("; "),5],
@@ -573,7 +571,7 @@ async function sendBrief(btn){
   const est=estimate(), del=deliveryDate(), need=toDate(S.needBy), late=need&&del>need;
   const data = {
     access_key: WEB3FORMS_KEY,
-    subject: "Brief: "+(S.contact.group||S.contact.name||"new enquiry")+" · concert "+fmt(toDate(S.concert)),
+    subject: "Brief: "+(S.contact.group||S.contact.name||"new enquiry")+" · parts by "+fmt(toDate(S.needBy)),
     from_name: "Short Notice Arranging",
     replyto: S.contact.email,
     name: S.contact.name,
@@ -662,8 +660,7 @@ const screens = {
     navHtml();
 },
 2(){
-  return head(2,"When’s the concert, and when do you need the parts?","Give yourself a rehearsal with the new parts if you can.")+
-    '<div class="field"><label class="f">Concert date</label>'+dateHtml("concert",S.concert)+'</div>'+
+  return head(2,"When do you need the parts?","Leave room for a rehearsal with the new parts if you can.")+
     '<div class="field"><label class="f">Parts needed by</label>'+dateHtml("need",S.needBy)+'</div>'+
     '<div class="feedback" id="dateFb"></div>'+navHtml();
 },
@@ -776,7 +773,7 @@ function dateFeedback(){
   fb.className="feedback";
   fb.innerHTML = days<=1
     ? "Parts by <b>"+fmt(n)+"</b>. Tight is what this is for. Keep going."
-    : "Parts by <b>"+fmt(n)+"</b>, concert "+(toDate(S.concert)?"on <b>"+fmt(toDate(S.concert))+"</b>":"to follow")+". Your date is the deadline.";
+    : "Parts by <b>"+fmt(n)+"</b>. Your date is the deadline.";
 }
 function lineupFeedback(){
   const el=$("#lineupSum"); if(!el) return;
@@ -832,8 +829,8 @@ function bind(el){
   });
   on("#probOther","input",e=>S.problemOther=e.target.value);
 
-  ["concert","need"].forEach(id=>{
-    const key = id==="concert"?"concert":"needBy";
+  ["need"].forEach(id=>{
+    const key = "needBy";
     ["d","m","y"].forEach(p=>{
       const s=el.querySelector("#"+id+"-"+p); if(!s) return;
       s.addEventListener("change",()=>{ S[key][p]=s.value; dateFeedback(); setErr(""); });
